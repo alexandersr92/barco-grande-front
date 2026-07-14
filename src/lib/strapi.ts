@@ -103,6 +103,23 @@ export interface DocumentLink {
   file?: StrapiMedia | null;
 }
 
+export interface IconFeature {
+  id: number;
+  title: string;
+  description?: string;
+  icon?: StrapiMedia | null;
+}
+
+export interface RewardPlan {
+  id: number;
+  title: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  programText?: string;
+  bonusText?: string;
+  icon?: StrapiMedia | null;
+}
+
 export interface Product {
   id: number;
   documentId: string;
@@ -114,6 +131,12 @@ export interface Product {
   description?: string;
   introHeading?: string;
   benefitsIntro?: string;
+  heroTheme?: "light" | "dark";
+  featuresHeading?: string;
+  featureBoxes?: IconFeature[];
+  rewardPlans?: RewardPlan[];
+  redeemIntro?: string;
+  redeemItems?: FeatureItem[];
   features?: FeatureItem[];
   benefits?: FeatureItem[];
   requirements?: FeatureItem[];
@@ -232,6 +255,9 @@ export async function getProduct(slug: string): Promise<Product | null> {
     "populate[conditions]": "true",
     "populate[faqs]": "true",
     "populate[documents][populate]": "file",
+    "populate[featureBoxes][populate]": "icon",
+    "populate[rewardPlans][populate]": "icon",
+    "populate[redeemItems]": "true",
     "populate[seo]": "true",
   });
   return res.data[0] ?? null;

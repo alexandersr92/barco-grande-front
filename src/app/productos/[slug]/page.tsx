@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getProduct, getProducts, getStrapiMedia } from "@/lib/strapi";
 import ProductTabs from "@/components/ProductTabs";
 import FaqAccordion from "@/components/FaqAccordion";
+import RewardPlans from "@/components/RewardPlans";
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -62,6 +63,7 @@ export default async function ProductPage({
   const audienceUrl = product.audience === "empresas" ? "/empresas" : "/";
   const photoUrl = getStrapiMedia(product.photo);
   const promoUrl = getStrapiMedia(product.promoImage);
+  const cardUrl = getStrapiMedia(product.cardImage);
 
   return (
     <>
@@ -82,41 +84,122 @@ export default async function ProductPage({
         <span className="text-muted">{product.name}</span>
       </div>
 
-      {/* Banner producto: título izquierda, foto derecha con franja naranja */}
-      <section className="bg-surface">
-        <div className="flex flex-col lg:h-[600px] lg:flex-row">
-          <div className="flex items-center justify-center px-8 py-16 lg:w-[38%] lg:px-0 lg:py-0">
-            <div className="w-full max-w-[450px]">
-              <h1 className="pb-5 text-[40px] leading-[1.15] tracking-[-1px] text-secondary md:text-[56px]">
+      {/* Banner producto */}
+      {product.heroTheme === "dark" ? (
+        // Variante oscura para tarjetas de crédito: degradado gris, ala
+        // decorativa y tarjeta flotante
+        <section className="relative overflow-hidden bg-gradient-to-r from-[#272727] to-[#808080]">
+          <div className="mx-auto flex max-w-[1220px] flex-col items-center px-8 py-12 lg:min-h-[417px] lg:flex-row lg:py-0">
+            <div className="w-full py-4 lg:w-[38%]">
+              <h1 className="max-w-[340px] pb-5 text-[40px] leading-[1.15] tracking-[-1px] text-white md:text-[56px]">
                 {product.name}
               </h1>
               {product.shortDescription && (
-                <p className="text-[17px] leading-7 text-muted">
+                <p className="max-w-[420px] pb-5 text-[17px] leading-7 text-white">
                   {product.shortDescription}
                 </p>
               )}
+              <Link
+                href="/canales-de-atencion"
+                className="inline-block bg-white px-[30px] pb-[15px] pt-[14px] text-base font-medium leading-[22.4px] text-primary transition-colors hover:bg-primary hover:text-white"
+              >
+                Solicitalá aquí
+              </Link>
+            </div>
+            <div className="relative hidden min-h-[417px] flex-1 lg:block">
+              <Image
+                src="/icons/avanz-wing-white.svg"
+                alt=""
+                width={378}
+                height={380}
+                className="absolute left-[10%] top-[-40px] w-[378px] opacity-40"
+              />
+              {cardUrl && (
+                <Image
+                  src={cardUrl}
+                  alt={product.name}
+                  width={318}
+                  height={345}
+                  priority
+                  className="absolute left-[45%] top-[40px] w-[318px] drop-shadow-2xl"
+                />
+              )}
             </div>
           </div>
-          <div className="relative min-h-[280px] flex-1 lg:min-h-0">
-            {photoUrl ? (
-              <Image
-                src={photoUrl}
-                alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 62vw"
-                className="object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-secondary to-secondary-dark" />
-            )}
-            <div className="absolute inset-x-0 bottom-0 h-3 bg-primary" />
+        </section>
+      ) : (
+        // Variante clara: banda gris con foto y franja naranja
+        <section className="bg-surface">
+          <div className="flex flex-col lg:h-[600px] lg:flex-row">
+            <div className="flex items-center justify-center px-8 py-16 lg:w-[38%] lg:px-0 lg:py-0">
+              <div className="w-full max-w-[450px]">
+                <h1 className="pb-5 text-[40px] leading-[1.15] tracking-[-1px] text-secondary md:text-[56px]">
+                  {product.name}
+                </h1>
+                {product.shortDescription && (
+                  <p className="text-[17px] leading-7 text-muted">
+                    {product.shortDescription}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="relative min-h-[280px] flex-1 lg:min-h-0">
+              {photoUrl ? (
+                <Image
+                  src={photoUrl}
+                  alt={product.name}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 62vw"
+                  className="object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary to-secondary-dark" />
+              )}
+              <div className="absolute inset-x-0 bottom-0 h-3 bg-primary" />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Intro + imagen promocional */}
-      {(product.introHeading || product.description || promoUrl) && (
+      {/* Feature boxes con íconos (tarjetas de crédito) */}
+      {product.featureBoxes && product.featureBoxes.length > 0 && (
+        <section className="mx-auto max-w-[1220px] px-5 pt-[95px]">
+          {product.featuresHeading && (
+            <h2 className="whitespace-pre-line pb-16 text-center text-[34px] leading-[1.2] tracking-[-1px] text-secondary md:text-[44px]">
+              {product.featuresHeading}
+            </h2>
+          )}
+          <div className="grid gap-y-12 md:grid-cols-3 md:divide-x md:divide-line">
+            {product.featureBoxes.map((box) => {
+              const iconUrl = getStrapiMedia(box.icon);
+              return (
+                <div
+                  key={box.id}
+                  className="flex flex-col items-center gap-[15px] px-14 text-center"
+                >
+                  {iconUrl && (
+                    <Image
+                      src={iconUrl}
+                      alt=""
+                      width={72}
+                      height={72}
+                      className="h-[72px] w-[72px] object-contain"
+                    />
+                  )}
+                  <h3 className="text-[24px] leading-[1.3] tracking-[-1px] text-secondary md:text-[28px]">
+                    {box.title}
+                  </h3>
+                  <p className="text-[17px] leading-7 text-muted">{box.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Intro + imagen promocional (solo cuando hay encabezado o imagen) */}
+      {(product.introHeading || promoUrl) && (
         <section className="mx-auto flex max-w-[1220px] flex-col items-center gap-10 px-8 pt-[100px] lg:flex-row lg:gap-0">
           <div className="flex-1 lg:pr-10">
             {product.introHeading && (
@@ -154,8 +237,15 @@ export default async function ProductPage({
           benefits={product.benefits?.length ? product.benefits : product.features}
           requirements={product.requirements}
           conditions={product.conditions}
+          redeemIntro={product.redeemIntro}
+          redeemItems={product.redeemItems}
         />
       </section>
+
+      {/* Planes de recompensa (tarjetas de crédito) */}
+      {product.rewardPlans && product.rewardPlans.length > 0 && (
+        <RewardPlans plans={product.rewardPlans} />
+      )}
 
       {/* Preguntas frecuentes */}
       {product.faqs && product.faqs.length > 0 && (

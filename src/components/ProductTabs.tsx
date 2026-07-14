@@ -11,23 +11,34 @@ interface Tab {
   items: FeatureItem[];
 }
 
-// Tabs "Beneficios | Requisitos | Condiciones" de la página de producto.
+// Tabs de "Lo que debes saber": Beneficios | Requisitos | Condiciones |
+// Canjear recompensas (solo aparecen las que tienen contenido).
 export default function ProductTabs({
   benefitsIntro,
   benefits,
   requirements,
   conditions,
+  redeemIntro,
+  redeemItems,
 }: {
   benefitsIntro?: string;
   benefits?: FeatureItem[];
   requirements?: FeatureItem[];
   conditions?: FeatureItem[];
+  redeemIntro?: string;
+  redeemItems?: FeatureItem[];
 }) {
   const tabs: Tab[] = [
     { key: "beneficios", label: "Beneficios", intro: benefitsIntro, items: benefits ?? [] },
     { key: "requisitos", label: "Requisitos", items: requirements ?? [] },
     { key: "condiciones", label: "Condiciones", items: conditions ?? [] },
-  ];
+    {
+      key: "canjear",
+      label: "Canjear recompensas",
+      intro: redeemIntro,
+      items: redeemItems ?? [],
+    },
+  ].filter((tab) => tab.items.length > 0 || tab.key === "beneficios");
 
   const [active, setActive] = useState(tabs[0]?.key);
   if (tabs.length === 0) return null;
