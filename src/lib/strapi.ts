@@ -20,6 +20,9 @@ export async function fetchAPI<T = unknown>(
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
     next: { revalidate: 60 },
+    // Corta rápido si Strapi no responde (p. ej. build sin backend accesible),
+    // para no colgar el build hasta el timeout de Next.
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok) {
