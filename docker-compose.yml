@@ -1,0 +1,22 @@
+# Compose del frontend Next.js para Dokploy.
+# Definí NEXT_PUBLIC_STRAPI_URL en la sección Environment de Dokploy con la URL
+# pública del backend Strapi (https://...). Se usa en build y en runtime.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL}
+    expose:
+      - "3000"
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
