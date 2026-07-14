@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 
+// Host del Strapi desplegado (p. ej. https://mi-strapi.up.railway.app),
+// tomado de la misma variable que usa el cliente de datos.
+const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337";
+const strapiHost = new URL(strapiUrl);
+
 const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowLocalIP: true,
@@ -8,10 +13,15 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "1337",
+        protocol: strapiHost.protocol.replace(":", "") as "http" | "https",
+        hostname: strapiHost.hostname,
+        port: strapiHost.port,
         pathname: "/uploads/**",
+      },
+      // Media Library de Strapi Cloud / proveedores S3 comunes
+      {
+        protocol: "https",
+        hostname: "*.media.strapiapp.com",
       },
     ],
   },

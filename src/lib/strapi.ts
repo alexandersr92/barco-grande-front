@@ -203,8 +203,11 @@ export async function getGlobal(): Promise<GlobalData | null> {
   }
 }
 
+// Los getters devuelven vacío si Strapi no está disponible (p. ej. build en
+// Vercel sin backend configurado) en lugar de romper el build.
 export async function getPage(slug: string): Promise<Page | null> {
-  const res = await fetchAPI<{ data: Page[] }>("/pages", {
+  try {
+    const res = await fetchAPI<{ data: Page[] }>("/pages", {
     "filters[slug][$eq]": slug,
     "populate[seo]": "true",
     // La zona dinámica requiere populate por componente (sintaxis `on` de Strapi v5)
@@ -224,9 +227,12 @@ export async function getPage(slug: string): Promise<Page | null> {
     "populate[sections][on][sections.section-heading][fields][1]": "kicker",
     "populate[sections][on][sections.section-heading][fields][2]": "subtitle",
     "populate[sections][on][sections.section-heading][fields][3]": "align",
-    "populate[sections][on][sections.rich-text][fields][0]": "body",
-  });
-  return res.data[0] ?? null;
+      "populate[sections][on][sections.rich-text][fields][0]": "body",
+    });
+    return res.data[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getProducts(
@@ -240,51 +246,71 @@ export async function getProducts(
   };
   if (filters.category) params["filters[category][$eq]"] = filters.category;
   if (filters.audience) params["filters[audience][$eq]"] = filters.audience;
-  const res = await fetchAPI<{ data: Product[] }>("/products", params);
-  return res.data;
+  try {
+    const res = await fetchAPI<{ data: Product[] }>("/products", params);
+    return res.data;
+  } catch {
+    return [];
+  }
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  const res = await fetchAPI<{ data: Product[] }>("/products", {
-    "filters[slug][$eq]": slug,
-    "populate[photo]": "true",
-    "populate[cardImage]": "true",
-    "populate[promoImage]": "true",
-    "populate[features]": "true",
-    "populate[benefits]": "true",
-    "populate[requirements]": "true",
-    "populate[conditions]": "true",
-    "populate[faqs]": "true",
-    "populate[documents][populate]": "file",
-    "populate[featureBoxes][populate]": "icon",
-    "populate[rewardPlans][populate]": "icon",
-    "populate[redeemItems]": "true",
-    "populate[seo]": "true",
-  });
-  return res.data[0] ?? null;
+  try {
+    const res = await fetchAPI<{ data: Product[] }>("/products", {
+      "filters[slug][$eq]": slug,
+      "populate[photo]": "true",
+      "populate[cardImage]": "true",
+      "populate[promoImage]": "true",
+      "populate[features]": "true",
+      "populate[benefits]": "true",
+      "populate[requirements]": "true",
+      "populate[conditions]": "true",
+      "populate[faqs]": "true",
+      "populate[documents][populate]": "file",
+      "populate[featureBoxes][populate]": "icon",
+      "populate[rewardPlans][populate]": "icon",
+      "populate[redeemItems]": "true",
+      "populate[seo]": "true",
+    });
+    return res.data[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getArticles(limit = 100): Promise<Article[]> {
-  const res = await fetchAPI<{ data: Article[] }>("/articles", {
-    sort: "date:desc",
-    "pagination[pageSize]": String(limit),
-    "populate[image]": "true",
-  });
-  return res.data;
+  try {
+    const res = await fetchAPI<{ data: Article[] }>("/articles", {
+      sort: "date:desc",
+      "pagination[pageSize]": String(limit),
+      "populate[image]": "true",
+    });
+    return res.data;
+  } catch {
+    return [];
+  }
 }
 
 export async function getArticle(slug: string): Promise<Article | null> {
-  const res = await fetchAPI<{ data: Article[] }>("/articles", {
-    "filters[slug][$eq]": slug,
-    populate: "*",
-  });
-  return res.data[0] ?? null;
+  try {
+    const res = await fetchAPI<{ data: Article[] }>("/articles", {
+      "filters[slug][$eq]": slug,
+      populate: "*",
+    });
+    return res.data[0] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getPromotions(limit = 100): Promise<Promotion[]> {
-  const res = await fetchAPI<{ data: Promotion[] }>("/promotions", {
-    "pagination[pageSize]": String(limit),
-    "populate[image]": "true",
-  });
-  return res.data;
+  try {
+    const res = await fetchAPI<{ data: Promotion[] }>("/promotions", {
+      "pagination[pageSize]": String(limit),
+      "populate[image]": "true",
+    });
+    return res.data;
+  } catch {
+    return [];
+  }
 }
