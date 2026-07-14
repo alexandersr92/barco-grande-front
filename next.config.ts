@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
 
-// Host del Strapi desplegado (p. ej. https://mi-strapi.up.railway.app),
-// tomado de la misma variable que usa el cliente de datos.
-// `||` (no `??`) para que un string vacío también caiga al default, y try/catch
-// para que una URL inválida nunca rompa el build.
+// ⚠️ MALA PRÁCTICA DELIBERADA: el backend usa un certificado SSL auto-firmado
+// y Node rechazaría la conexión. Desactivamos la validación TLS de todo el
+// proceso del servidor Next para que el fetch de datos y la optimización de
+// imágenes puedan hablar con el backend. Reemplazar por un cert válido
+// (Let's Encrypt con un dominio propio) antes de producción real.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+// URL del backend quemada directamente (sin depender de variables de entorno
+// en el panel de deploy). En local, .env.local la sobreescribe con localhost.
 const FALLBACK_STRAPI_URL =
   "https://carnes-strapi-ca6779-82-180-133-127.traefik.me";
 const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || FALLBACK_STRAPI_URL;
