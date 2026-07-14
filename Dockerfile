@@ -19,4 +19,7 @@ ARG NEXT_PUBLIC_STRAPI_URL
 ENV NEXT_PUBLIC_STRAPI_URL=$NEXT_PUBLIC_STRAPI_URL
 COPY --from=build /app ./
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+# Escuchar en 0.0.0.0 (no localhost) para que Traefik/Dokploy alcance el contenedor.
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
