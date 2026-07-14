@@ -65,12 +65,23 @@ export interface FooterColumn {
   links: LinkItem[];
 }
 
+export interface SocialLink {
+  id: number;
+  name?: string;
+  url: string;
+  icon?: StrapiMedia | null;
+}
+
 export interface GlobalData {
   siteName: string;
   logo?: StrapiMedia | null;
   topNav: LinkItem[];
+  audienceNav: LinkItem[];
   mainNav: NavItem[];
+  socialLinks: SocialLink[];
   ebankingUrl?: string;
+  usdBuy?: number;
+  usdSell?: number;
   footerColumns: FooterColumn[];
   address?: string;
   phone?: string;
@@ -100,6 +111,7 @@ export interface Article {
   title: string;
   slug: string;
   date?: string;
+  category?: string;
   excerpt?: string;
   content?: string;
   image?: StrapiMedia | null;
@@ -135,7 +147,9 @@ export async function getGlobal(): Promise<GlobalData | null> {
     const res = await fetchAPI<{ data: GlobalData }>("/global", {
       "populate[logo]": "true",
       "populate[topNav]": "true",
+      "populate[audienceNav]": "true",
       "populate[mainNav][populate]": "links",
+      "populate[socialLinks][populate]": "icon",
       "populate[footerColumns][populate]": "links",
     });
     return res.data;
@@ -147,8 +161,25 @@ export async function getGlobal(): Promise<GlobalData | null> {
 export async function getPage(slug: string): Promise<Page | null> {
   const res = await fetchAPI<{ data: Page[] }>("/pages", {
     "filters[slug][$eq]": slug,
-    "populate[sections][populate]": "*",
     "populate[seo]": "true",
+    // La zona dinámica requiere populate por componente (sintaxis `on` de Strapi v5)
+    // para alcanzar media anidada en componentes repetibles.
+    "populate[sections][on][sections.hero][populate]": "*",
+    "populate[sections][on][sections.product-showcase][populate]": "*",
+    "populate[sections][on][sections.product-grid][populate]": "*",
+    "populate[sections][on][sections.product-links][populate][items][populate]": "icon",
+    "populate[sections][on][sections.channels-converter][populate]": "*",
+    "populate[sections][on][sections.feature-banner][populate]": "*",
+    "populate[sections][on][sections.info-cards][populate][cards][populate]": "image",
+    "populate[sections][on][sections.news-list][populate]": "*",
+    "populate[sections][on][sections.promotions-list][populate]": "*",
+    "populate[sections][on][sections.app-banner][populate]": "*",
+    "populate[sections][on][sections.channels-bar][populate]": "*",
+    "populate[sections][on][sections.section-heading][fields][0]": "title",
+    "populate[sections][on][sections.section-heading][fields][1]": "kicker",
+    "populate[sections][on][sections.section-heading][fields][2]": "subtitle",
+    "populate[sections][on][sections.section-heading][fields][3]": "align",
+    "populate[sections][on][sections.rich-text][fields][0]": "body",
   });
   return res.data[0] ?? null;
 }

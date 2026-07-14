@@ -27,7 +27,9 @@ const CATEGORY_LABEL: Record<string, { label: string; url: string }> = {
   cuenta: { label: "Cuentas", url: "/cuentas" },
   tarjeta: { label: "Tarjetas", url: "/tarjetas" },
   credito: { label: "Créditos", url: "/creditos" },
-  servicio: { label: "Servicios", url: "/" },
+  seguro: { label: "Seguros", url: "/seguros" },
+  transferencia: { label: "Transferencias", url: "/transferencias" },
+  servicio: { label: "Servicios", url: "/servicios" },
 };
 
 export default async function ProductPage({

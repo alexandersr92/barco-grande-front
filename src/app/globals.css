@@ -2,11 +2,15 @@
 
 @theme {
   --color-primary: #ff7500;
+  --color-primary-light: #ffa455;
   --color-primary-dark: #e56900;
   --color-secondary: #005f86;
   --color-secondary-dark: #004d6d;
+  --color-teal: #007681;
   --color-muted: #84858a;
-  --color-surface: #f5f6f7;
+  --color-muted-light: #aaabb0;
+  --color-line: #ced0d6;
+  --color-surface: #f5f5f5;
   --font-sans: var(--font-open-sans), "Open Sans", Arial, Helvetica, sans-serif;
 }
 

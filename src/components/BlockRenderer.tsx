@@ -10,6 +10,16 @@ import AppBanner, { type AppBannerProps } from "@/components/sections/AppBanner"
 import InfoCards, { type InfoCard } from "@/components/sections/InfoCards";
 import ProductGrid from "@/components/sections/ProductGrid";
 import RichText from "@/components/sections/RichText";
+import SectionHeading, {
+  type SectionHeadingProps,
+} from "@/components/sections/SectionHeading";
+import ProductLinks, { type QuickLinkItem } from "@/components/sections/ProductLinks";
+import ChannelsConverter, {
+  type ChannelsConverterProps,
+} from "@/components/sections/ChannelsConverter";
+import FeatureBanner, {
+  type FeatureBannerProps,
+} from "@/components/sections/FeatureBanner";
 
 export default function BlockRenderer({ sections }: { sections: Section[] }) {
   return (
@@ -67,6 +77,25 @@ export default function BlockRenderer({ sections }: { sections: Section[] }) {
             );
           case "sections.rich-text":
             return <RichText key={key} body={section.body as string} />;
+          case "sections.section-heading":
+            return (
+              <SectionHeading key={key} {...(section as unknown as SectionHeadingProps)} />
+            );
+          case "sections.product-links":
+            return (
+              <ProductLinks key={key} items={(section.items as QuickLinkItem[]) ?? []} />
+            );
+          case "sections.channels-converter":
+            return (
+              <ChannelsConverter
+                key={key}
+                {...(section as unknown as ChannelsConverterProps)}
+              />
+            );
+          case "sections.feature-banner":
+            return (
+              <FeatureBanner key={key} {...(section as unknown as FeatureBannerProps)} />
+            );
           default:
             return null;
         }

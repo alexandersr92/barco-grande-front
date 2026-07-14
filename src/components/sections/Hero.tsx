@@ -11,41 +11,58 @@ export interface HeroProps {
   buttons?: ButtonItem[];
 }
 
+// Hero del diseño: foto a sangre completa con panel naranja translúcido a la izquierda.
 export default function Hero({ kicker, title, subtitle, image, buttons }: HeroProps) {
   const imageUrl = getStrapiMedia(image);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-r from-secondary-dark to-secondary text-white">
+    <section className="relative min-h-[520px] overflow-hidden bg-surface lg:h-[768px]">
       {imageUrl && (
         <Image
           src={imageUrl}
           alt=""
           fill
           priority
-          className="object-cover opacity-30"
+          sizes="100vw"
+          className="object-cover"
         />
       )}
-      <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-5 px-4 py-24 md:py-32">
-        {kicker && (
-          <span className="text-sm font-bold uppercase tracking-[3px] text-orange-300">
-            {kicker}
-          </span>
-        )}
-        <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="max-w-2xl text-lg font-semibold text-white/85 md:text-xl">
-            {subtitle}
-          </p>
-        )}
-        {buttons && buttons.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-4">
-            {buttons.map((b) => (
-              <CtaButton key={b.id} button={b} />
-            ))}
+      <div className="relative flex h-full min-h-[520px] items-stretch">
+        <div className="relative flex w-full items-center justify-center bg-[rgba(255,117,0,0.85)] px-8 py-20 md:w-[41%] md:px-12 lg:py-0">
+          {/* Ala decorativa */}
+          <div className="pointer-events-none absolute -right-[88px] top-0 hidden lg:block">
+            <Image
+              src="/icons/hero-wing.svg"
+              alt=""
+              width={174}
+              height={174}
+              className="h-[174px] w-[174px]"
+            />
           </div>
-        )}
+          <div className="w-full max-w-[350px]">
+            {kicker && (
+              <p className="pb-[30px] text-sm uppercase leading-[22.4px] tracking-[1px] text-white/80">
+                {kicker}
+              </p>
+            )}
+            <h1 className="pb-[30px] text-[42px] font-medium leading-[1.15] tracking-[-1px] text-white lg:text-[56px]">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="whitespace-pre-line text-[22px] leading-[28.6px] text-white/80">
+                {subtitle}
+              </p>
+            )}
+            {buttons && buttons.length > 0 && (
+              <div className="mt-8 flex flex-wrap gap-4">
+                {buttons.map((b) => (
+                  <CtaButton key={b.id} button={b} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="hidden flex-1 md:block" />
       </div>
     </section>
   );
