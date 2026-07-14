@@ -1,10 +1,18 @@
 // `||` (no `??`) para que un string vacío —como el que a veces inyecta el
 // entorno de deploy— también caiga al default. En local, .env.local fija
 // http://localhost:1337, así que el default de producción no afecta el dev.
+// URL PÚBLICA: la que ve el navegador (para construir URLs de imágenes/media).
 const STRAPI_URL =
   process.env.NEXT_PUBLIC_STRAPI_URL ||
   "https://carnes-strapi-ca6779-82-180-133-127.traefik.me";
 
+// URL INTERNA para el fetch server-side. En el VPS, el contenedor del frontend
+// habla con el del backend por la red interna de Docker (HTTP, sin pasar por
+// el dominio público → evita problemas de hairpin/SSL). Si no se define,
+// usa la pública.
+const STRAPI_API_URL = process.env.STRAPI_INTERNAL_URL || STRAPI_URL;
+
+// Para URLs de media (las carga el navegador): siempre pública.
 export function getStrapiURL(path = ""): string {
   return `${STRAPI_URL}${path}`;
 }
@@ -19,7 +27,8 @@ export async function fetchAPI<T = unknown>(
   params: Record<string, string> = {},
 ): Promise<T> {
   const query = new URLSearchParams(params).toString();
-  const url = `${getStrapiURL(`/api${path}`)}${query ? `?${query}` : ""}`;
+  // El fetch de datos usa la URL interna (server-side).
+  const url = `${STRAPI_API_URL}/api${path}${query ? `?${query}` : ""}`;
 
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
