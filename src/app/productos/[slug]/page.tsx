@@ -86,9 +86,16 @@ export default async function ProductPage({
 
       {/* Banner producto */}
       {product.heroTheme === "dark" ? (
-        // Variante oscura para tarjetas de crédito: degradado gris, ala
-        // decorativa y tarjeta flotante
-        <section className="relative overflow-hidden bg-gradient-to-r from-[#272727] to-[#808080]">
+        // Variante oscura para tarjetas de crédito: gradiente configurable
+        // desde Strapi, ala decorativa y tarjeta flotante
+        <section
+          className="relative overflow-hidden"
+          style={{
+            background:
+              product.heroGradient ??
+              "linear-gradient(90deg, #272727 0%, #808080 100%)",
+          }}
+        >
           <div className="mx-auto flex max-w-[1220px] flex-col items-center px-8 py-12 lg:min-h-[417px] lg:flex-row lg:py-0">
             <div className="w-full py-4 lg:w-[38%]">
               <h1 className="max-w-[340px] pb-5 text-[40px] leading-[1.15] tracking-[-1px] text-white md:text-[56px]">
@@ -108,11 +115,11 @@ export default async function ProductPage({
             </div>
             <div className="relative hidden min-h-[417px] flex-1 lg:block">
               <Image
-                src="/icons/avanz-wing-white.svg"
+                src="/icons/avanz-wing-watermark.svg"
                 alt=""
                 width={378}
                 height={380}
-                className="absolute left-[10%] top-[-40px] w-[378px] opacity-40"
+                className="absolute left-[10%] top-[-40px] w-[378px] mix-blend-lighten"
               />
               {cardUrl && (
                 <Image

@@ -132,6 +132,7 @@ export interface Product {
   introHeading?: string;
   benefitsIntro?: string;
   heroTheme?: "light" | "dark";
+  heroGradient?: string;
   featuresHeading?: string;
   featureBoxes?: IconFeature[];
   rewardPlans?: RewardPlan[];
