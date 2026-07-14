@@ -1,0 +1,202 @@
+const STRAPI_URL =
+  process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337";
+
+export function getStrapiURL(path = ""): string {
+  return `${STRAPI_URL}${path}`;
+}
+
+export function getStrapiMedia(media?: StrapiMedia | null): string | null {
+  if (!media?.url) return null;
+  return media.url.startsWith("http") ? media.url : getStrapiURL(media.url);
+}
+
+export async function fetchAPI<T = unknown>(
+  path: string,
+  params: Record<string, string> = {},
+): Promise<T> {
+  const query = new URLSearchParams(params).toString();
+  const url = `${getStrapiURL(`/api${path}`)}${query ? `?${query}` : ""}`;
+
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Error consultando Strapi (${res.status}): ${url}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+// ——— Tipos ———
+
+export interface StrapiMedia {
+  url: string;
+  alternativeText?: string | null;
+  width?: number;
+  height?: number;
+}
+
+export interface LinkItem {
+  id: number;
+  label: string;
+  url: string;
+}
+
+export interface ButtonItem extends LinkItem {
+  variant?: "primary" | "outline" | "link";
+}
+
+export interface FeatureItem {
+  id: number;
+  text: string;
+}
+
+export interface NavItem {
+  id: number;
+  label: string;
+  url?: string;
+  links?: LinkItem[];
+}
+
+export interface FooterColumn {
+  id: number;
+  title: string;
+  links: LinkItem[];
+}
+
+export interface GlobalData {
+  siteName: string;
+  logo?: StrapiMedia | null;
+  topNav: LinkItem[];
+  mainNav: NavItem[];
+  ebankingUrl?: string;
+  footerColumns: FooterColumn[];
+  address?: string;
+  phone?: string;
+  copyright?: string;
+}
+
+export interface Product {
+  id: number;
+  documentId: string;
+  name: string;
+  slug: string;
+  category: "cuenta" | "tarjeta" | "credito" | "servicio";
+  audience: "personas" | "empresas";
+  shortDescription?: string;
+  description?: string;
+  features?: FeatureItem[];
+  benefits?: FeatureItem[];
+  requirements?: FeatureItem[];
+  photo?: StrapiMedia | null;
+  cardImage?: StrapiMedia | null;
+  order?: number;
+}
+
+export interface Article {
+  id: number;
+  documentId: string;
+  title: string;
+  slug: string;
+  date?: string;
+  excerpt?: string;
+  content?: string;
+  image?: StrapiMedia | null;
+}
+
+export interface Promotion {
+  id: number;
+  documentId: string;
+  title: string;
+  description?: string;
+  image?: StrapiMedia | null;
+}
+
+export interface Section {
+  __component: string;
+  id: number;
+  [key: string]: unknown;
+}
+
+export interface Page {
+  id: number;
+  documentId: string;
+  title: string;
+  slug: string;
+  sections: Section[];
+  seo?: { metaTitle?: string; metaDescription?: string } | null;
+}
+
+// ——— Consultas ———
+
+export async function getGlobal(): Promise<GlobalData | null> {
+  try {
+    const res = await fetchAPI<{ data: GlobalData }>("/global", {
+      "populate[logo]": "true",
+      "populate[topNav]": "true",
+      "populate[mainNav][populate]": "links",
+      "populate[footerColumns][populate]": "links",
+    });
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
+export async function getPage(slug: string): Promise<Page | null> {
+  const res = await fetchAPI<{ data: Page[] }>("/pages", {
+    "filters[slug][$eq]": slug,
+    "populate[sections][populate]": "*",
+    "populate[seo]": "true",
+  });
+  return res.data[0] ?? null;
+}
+
+export async function getProducts(
+  filters: { category?: string; audience?: string } = {},
+): Promise<Product[]> {
+  const params: Record<string, string> = {
+    sort: "order:asc",
+    "pagination[pageSize]": "100",
+    "populate[photo]": "true",
+    "populate[cardImage]": "true",
+  };
+  if (filters.category) params["filters[category][$eq]"] = filters.category;
+  if (filters.audience) params["filters[audience][$eq]"] = filters.audience;
+  const res = await fetchAPI<{ data: Product[] }>("/products", params);
+  return res.data;
+}
+
+export async function getProduct(slug: string): Promise<Product | null> {
+  const res = await fetchAPI<{ data: Product[] }>("/products", {
+    "filters[slug][$eq]": slug,
+    populate: "*",
+  });
+  return res.data[0] ?? null;
+}
+
+export async function getArticles(limit = 100): Promise<Article[]> {
+  const res = await fetchAPI<{ data: Article[] }>("/articles", {
+    sort: "date:desc",
+    "pagination[pageSize]": String(limit),
+    "populate[image]": "true",
+  });
+  return res.data;
+}
+
+export async function getArticle(slug: string): Promise<Article | null> {
+  const res = await fetchAPI<{ data: Article[] }>("/articles", {
+    "filters[slug][$eq]": slug,
+    populate: "*",
+  });
+  return res.data[0] ?? null;
+}
+
+export async function getPromotions(limit = 100): Promise<Promotion[]> {
+  const res = await fetchAPI<{ data: Promotion[] }>("/promotions", {
+    "pagination[pageSize]": String(limit),
+    "populate[image]": "true",
+  });
+  return res.data;
+}

@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #ff7500;
+  --color-primary-dark: #e56900;
+  --color-secondary: #005f86;
+  --color-secondary-dark: #004d6d;
+  --color-muted: #84858a;
+  --color-surface: #f5f6f7;
+  --font-sans: var(--font-open-sans), "Open Sans", Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: #ffffff;
+  color: #333333;
+  font-family: var(--font-open-sans), "Open Sans", Arial, Helvetica, sans-serif;
+}
