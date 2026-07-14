@@ -2,8 +2,16 @@ import type { NextConfig } from "next";
 
 // Host del Strapi desplegado (p. ej. https://mi-strapi.up.railway.app),
 // tomado de la misma variable que usa el cliente de datos.
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337";
-const strapiHost = new URL(strapiUrl);
+// `||` (no `??`) para que un string vacío también caiga al default, y try/catch
+// para que una URL inválida nunca rompa el build.
+const strapiUrl =
+  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+let strapiHost: URL;
+try {
+  strapiHost = new URL(strapiUrl);
+} catch {
+  strapiHost = new URL("http://localhost:1337");
+}
 
 const nextConfig: NextConfig = {
   images: {
