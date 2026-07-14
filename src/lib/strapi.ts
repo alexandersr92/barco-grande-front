@@ -80,6 +80,8 @@ export interface GlobalData {
   mainNav: NavItem[];
   socialLinks: SocialLink[];
   ebankingUrl?: string;
+  appStoreUrl?: string;
+  playStoreUrl?: string;
   usdBuy?: number;
   usdSell?: number;
   footerColumns: FooterColumn[];
@@ -88,20 +90,39 @@ export interface GlobalData {
   copyright?: string;
 }
 
+export interface FaqItem {
+  id: number;
+  question: string;
+  answer?: string;
+}
+
+export interface DocumentLink {
+  id: number;
+  label: string;
+  url?: string;
+  file?: StrapiMedia | null;
+}
+
 export interface Product {
   id: number;
   documentId: string;
   name: string;
   slug: string;
-  category: "cuenta" | "tarjeta" | "credito" | "servicio";
+  category: "cuenta" | "tarjeta" | "credito" | "seguro" | "transferencia" | "servicio";
   audience: "personas" | "empresas";
   shortDescription?: string;
   description?: string;
+  introHeading?: string;
+  benefitsIntro?: string;
   features?: FeatureItem[];
   benefits?: FeatureItem[];
   requirements?: FeatureItem[];
+  conditions?: FeatureItem[];
+  faqs?: FaqItem[];
+  documents?: DocumentLink[];
   photo?: StrapiMedia | null;
   cardImage?: StrapiMedia | null;
+  promoImage?: StrapiMedia | null;
   order?: number;
 }
 
@@ -202,7 +223,16 @@ export async function getProducts(
 export async function getProduct(slug: string): Promise<Product | null> {
   const res = await fetchAPI<{ data: Product[] }>("/products", {
     "filters[slug][$eq]": slug,
-    populate: "*",
+    "populate[photo]": "true",
+    "populate[cardImage]": "true",
+    "populate[promoImage]": "true",
+    "populate[features]": "true",
+    "populate[benefits]": "true",
+    "populate[requirements]": "true",
+    "populate[conditions]": "true",
+    "populate[faqs]": "true",
+    "populate[documents][populate]": "file",
+    "populate[seo]": "true",
   });
   return res.data[0] ?? null;
 }

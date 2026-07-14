@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
-import { getProduct, getProducts } from "@/lib/strapi";
-import ProductShowcase from "@/components/sections/ProductShowcase";
-import { CheckIcon } from "@/components/ui";
+import { getProduct, getProducts, getStrapiMedia } from "@/lib/strapi";
+import ProductTabs from "@/components/ProductTabs";
+import FaqAccordion from "@/components/FaqAccordion";
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -32,6 +33,20 @@ const CATEGORY_LABEL: Record<string, { label: string; url: string }> = {
   servicio: { label: "Servicios", url: "/servicios" },
 };
 
+function BreadcrumbSeparator() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden className="text-muted">
+      <path
+        d="M4.5 2.5 8 6l-3.5 3.5"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default async function ProductPage({
   params,
 }: {
@@ -42,84 +57,156 @@ export default async function ProductPage({
   if (!product) notFound();
 
   const category = CATEGORY_LABEL[product.category];
+  const audienceLabel =
+    product.audience === "empresas" ? "Banca Empresas" : "Banca Personas";
+  const audienceUrl = product.audience === "empresas" ? "/empresas" : "/";
+  const photoUrl = getStrapiMedia(product.photo);
+  const promoUrl = getStrapiMedia(product.promoImage);
 
   return (
     <>
       {/* Migas de pan */}
-      <div className="bg-surface">
-        <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 text-sm font-semibold text-muted">
-          <Link href="/" className="hover:text-primary">
-            Inicio
-          </Link>
-          <span>/</span>
-          <Link href={category.url} className="hover:text-primary">
-            {category.label}
-          </Link>
-          <span>/</span>
-          <span className="text-secondary">{product.name}</span>
-        </div>
+      <div className="mx-auto flex max-w-[1220px] flex-wrap items-center gap-2.5 px-10 py-[19px] text-sm leading-[22.4px]">
+        <Link href="/" className="text-primary hover:text-primary-dark">
+          Inicio
+        </Link>
+        <BreadcrumbSeparator />
+        <Link href={audienceUrl} className="text-primary hover:text-primary-dark">
+          {audienceLabel}
+        </Link>
+        <BreadcrumbSeparator />
+        <Link href={category.url} className="text-primary hover:text-primary-dark">
+          {category.label}
+        </Link>
+        <BreadcrumbSeparator />
+        <span className="text-muted">{product.name}</span>
       </div>
 
-      <ProductShowcase
-        heading={product.name}
-        description={product.shortDescription}
-        features={product.features}
-        photo={product.photo}
-        cardImage={product.cardImage}
-        buttons={[
-          { id: 1, label: "Solicitala aqui", url: "/canales-de-atencion", variant: "primary" },
-        ]}
-      />
-
-      {product.description && (
-        <section className="bg-surface py-16">
-          <div className="mx-auto max-w-4xl px-4">
-            <h2 className="mb-6 text-3xl font-bold tracking-[-1px] text-secondary">
-              Lo que debes saber
-            </h2>
-            <p className="text-[17px] font-semibold leading-7 text-muted">
-              {product.description}
-            </p>
+      {/* Banner producto: título izquierda, foto derecha con franja naranja */}
+      <section className="bg-surface">
+        <div className="flex flex-col lg:h-[600px] lg:flex-row">
+          <div className="flex items-center justify-center px-8 py-16 lg:w-[38%] lg:px-0 lg:py-0">
+            <div className="w-full max-w-[450px]">
+              <h1 className="pb-5 text-[40px] leading-[1.15] tracking-[-1px] text-secondary md:text-[56px]">
+                {product.name}
+              </h1>
+              {product.shortDescription && (
+                <p className="text-[17px] leading-7 text-muted">
+                  {product.shortDescription}
+                </p>
+              )}
+            </div>
           </div>
+          <div className="relative min-h-[280px] flex-1 lg:min-h-0">
+            {photoUrl ? (
+              <Image
+                src={photoUrl}
+                alt={product.name}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 62vw"
+                className="object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary to-secondary-dark" />
+            )}
+            <div className="absolute inset-x-0 bottom-0 h-3 bg-primary" />
+          </div>
+        </div>
+      </section>
+
+      {/* Intro + imagen promocional */}
+      {(product.introHeading || product.description || promoUrl) && (
+        <section className="mx-auto flex max-w-[1220px] flex-col items-center gap-10 px-8 pt-[100px] lg:flex-row lg:gap-0">
+          <div className="flex-1 lg:pr-10">
+            {product.introHeading && (
+              <h2 className="max-w-[616px] pb-[26px] text-[32px] leading-[1.2] tracking-[-1px] text-secondary md:text-[44px]">
+                {product.introHeading}
+              </h2>
+            )}
+            {product.description && (
+              <p className="max-w-[656px] text-[17px] leading-7 text-muted">
+                {product.description}
+              </p>
+            )}
+          </div>
+          {promoUrl && (
+            <div className="w-full max-w-[464px] shrink-0">
+              <Image
+                src={promoUrl}
+                alt={product.name}
+                width={464}
+                height={466}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          )}
         </section>
       )}
 
-      {(product.benefits?.length || product.requirements?.length) && (
-        <section className="mx-auto grid max-w-7xl gap-12 px-4 py-16 md:grid-cols-2">
-          {product.benefits && product.benefits.length > 0 && (
-            <div>
-              <h2 className="mb-6 text-3xl font-bold tracking-[-1px] text-secondary">
-                Beneficios
-              </h2>
-              <ul className="space-y-3">
-                {product.benefits.map((b) => (
-                  <li key={b.id} className="flex items-start gap-3">
-                    <CheckIcon />
-                    <span className="text-[16px] font-semibold leading-7 text-muted">
-                      {b.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {product.requirements && product.requirements.length > 0 && (
-            <div>
-              <h2 className="mb-6 text-3xl font-bold tracking-[-1px] text-secondary">
-                Requisitos generales
-              </h2>
-              <ul className="space-y-3">
-                {product.requirements.map((r) => (
-                  <li key={r.id} className="flex items-start gap-3">
-                    <CheckIcon />
-                    <span className="text-[16px] font-semibold leading-7 text-muted">
-                      {r.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+      {/* Lo que debes saber: tabs */}
+      <section className="mx-auto max-w-[1220px] px-8 pt-[90px]">
+        <h2 className="pb-10 text-center text-[34px] leading-[1.2] tracking-[-1px] text-secondary md:text-[44px]">
+          Lo que debes saber
+        </h2>
+        <ProductTabs
+          benefitsIntro={product.benefitsIntro}
+          benefits={product.benefits?.length ? product.benefits : product.features}
+          requirements={product.requirements}
+          conditions={product.conditions}
+        />
+      </section>
+
+      {/* Preguntas frecuentes */}
+      {product.faqs && product.faqs.length > 0 && (
+        <section className="mx-auto max-w-[1180px] px-8 pt-[90px]">
+          <h2 className="pb-8 text-center text-[34px] leading-[1.2] tracking-[-1px] text-secondary md:text-[44px]">
+            Preguntas Frecuentes
+          </h2>
+          <FaqAccordion faqs={product.faqs} />
+        </section>
+      )}
+
+      {/* Descargar documentación */}
+      {product.documents && product.documents.length > 0 && (
+        <section className="mx-auto max-w-[1180px] px-8 py-[90px]">
+          <h2 className="pb-8 text-center text-[34px] leading-[1.2] tracking-[-1px] text-secondary md:text-[44px]">
+            Descargar Documentación
+          </h2>
+          <div>
+            {product.documents.map((doc) => {
+              const fileUrl = getStrapiMedia(doc.file) ?? doc.url ?? "#";
+              return (
+                <a
+                  key={doc.id}
+                  href={fileUrl}
+                  target={fileUrl.startsWith("http") ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between gap-4 border-b border-line py-6"
+                >
+                  <span className="text-lg leading-[24.3px] text-secondary group-hover:text-primary">
+                    {doc.label}
+                  </span>
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 26 26"
+                    fill="none"
+                    aria-hidden
+                    className="shrink-0 text-primary"
+                  >
+                    <path
+                      d="M13 3.5v12m0 0 4.5-4.5M13 15.5 8.5 11M4.5 19.5h17v3h-17v-3Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </a>
+              );
+            })}
+          </div>
         </section>
       )}
     </>

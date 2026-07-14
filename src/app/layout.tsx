@@ -4,6 +4,7 @@ import "./globals.css";
 import { getGlobal } from "@/lib/strapi";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AppDownloadBanner from "@/components/AppDownloadBanner";
 
 const openSans = Open_Sans({
   variable: "--font-open-sans",
@@ -31,6 +32,10 @@ export default async function RootLayout({
       <body className="flex min-h-screen flex-col">
         <Header global={global} />
         <main className="flex-1">{children}</main>
+        <AppDownloadBanner
+          appStoreUrl={global?.appStoreUrl}
+          playStoreUrl={global?.playStoreUrl}
+        />
         <Footer global={global} />
       </body>
     </html>
