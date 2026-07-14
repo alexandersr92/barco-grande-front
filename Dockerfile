@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 # NEXT_PUBLIC_STRAPI_URL debe estar disponible en el build: Next lo "hornea"
 # en el bundle del cliente y lo usa para configurar next/image.
-ARG NEXT_PUBLIC_STRAPI_URL
+ARG NEXT_PUBLIC_STRAPI_URL=https://carnes-strapi-ca6779-82-180-133-127.traefik.me
 ENV NEXT_PUBLIC_STRAPI_URL=$NEXT_PUBLIC_STRAPI_URL
 RUN npm run build
 
@@ -15,7 +15,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 # NEXT_PUBLIC_STRAPI_URL también en runtime: los Server Components leen
 # process.env para consultar la API de Strapi.
-ARG NEXT_PUBLIC_STRAPI_URL
+ARG NEXT_PUBLIC_STRAPI_URL=https://carnes-strapi-ca6779-82-180-133-127.traefik.me
 ENV NEXT_PUBLIC_STRAPI_URL=$NEXT_PUBLIC_STRAPI_URL
 COPY --from=build /app ./
 EXPOSE 3000
