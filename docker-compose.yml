@@ -7,11 +7,13 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL}
+        # Usa la variable de Dokploy si está; si no, cae al valor por defecto
+        # (la URL pública del backend). Evita que el build quede sin URL.
+        NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:-https://carnes-strapi-ca6779-82-180-133-127.traefik.me}
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL}
+      NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:-https://carnes-strapi-ca6779-82-180-133-127.traefik.me}
     expose:
       - "3000"
     networks:
