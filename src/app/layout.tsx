@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   description: "Ponemos a disposición productos y servicios a tu medida.",
 };
 
+// Renderizar en runtime (no pre-generar en el build): así el fetch de datos
+// usa la red interna de Docker, que solo existe con el contenedor corriendo.
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
