@@ -4,13 +4,14 @@ import type { NextConfig } from "next";
 // tomado de la misma variable que usa el cliente de datos.
 // `||` (no `??`) para que un string vacío también caiga al default, y try/catch
 // para que una URL inválida nunca rompa el build.
-const strapiUrl =
-  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const FALLBACK_STRAPI_URL =
+  "https://carnes-strapi-ca6779-82-180-133-127.traefik.me";
+const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || FALLBACK_STRAPI_URL;
 let strapiHost: URL;
 try {
   strapiHost = new URL(strapiUrl);
 } catch {
-  strapiHost = new URL("http://localhost:1337");
+  strapiHost = new URL(FALLBACK_STRAPI_URL);
 }
 
 const nextConfig: NextConfig = {

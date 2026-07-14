@@ -1,5 +1,9 @@
+// `||` (no `??`) para que un string vacío —como el que a veces inyecta el
+// entorno de deploy— también caiga al default. En local, .env.local fija
+// http://localhost:1337, así que el default de producción no afecta el dev.
 const STRAPI_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337";
+  process.env.NEXT_PUBLIC_STRAPI_URL ||
+  "https://carnes-strapi-ca6779-82-180-133-127.traefik.me";
 
 export function getStrapiURL(path = ""): string {
   return `${STRAPI_URL}${path}`;
