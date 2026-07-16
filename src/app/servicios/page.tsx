@@ -1,20 +1,8 @@
-import type { Metadata } from "next";
-import PageHero from "@/components/PageHero";
-import ProductGrid from "@/components/sections/ProductGrid";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Otros Servicios",
-  description: "Pago de servicios, mesa de cambio y garantías bancarias.",
-};
-
-export default function ServiciosPage() {
-  return (
-    <>
-      <PageHero
-        title="Otros Servicios"
-        subtitle="Más soluciones para tu día a día"
-      />
-      <ProductGrid category="servicio" audience="personas" />
-    </>
-  );
+// Ruta antigua sin prefijo de audiencia. El contenido vive ahora bajo
+// /personas/servicios (ver /[audience]/[slug]). next.config.ts ya redirige esta
+// URL; este stub es el respaldo.
+export default function Page() {
+  redirect("/personas/servicios");
 }

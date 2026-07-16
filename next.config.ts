@@ -19,7 +19,28 @@ try {
   strapiHost = new URL(FALLBACK_STRAPI_URL);
 }
 
+// Las páginas de Personas viven bajo /personas/*. Las URLs viejas sin prefijo
+// redirigen ahí para no romper enlaces existentes y mantener la simetría con
+// /empresas/*.
+const PERSONAS_SLUGS = [
+  "cuentas",
+  "tarjetas",
+  "creditos",
+  "seguros",
+  "transferencias",
+  "servicios",
+  "canales-de-atencion",
+  "zona-digital",
+];
+
 const nextConfig: NextConfig = {
+  async redirects() {
+    return PERSONAS_SLUGS.map((slug) => ({
+      source: `/${slug}`,
+      destination: `/personas/${slug}`,
+      permanent: false,
+    }));
+  },
   images: {
     dangerouslyAllowLocalIP: true,
     dangerouslyAllowSVG: true,

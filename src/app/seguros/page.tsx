@@ -1,20 +1,8 @@
-import type { Metadata } from "next";
-import PageHero from "@/components/PageHero";
-import ProductGrid from "@/components/sections/ProductGrid";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Seguros",
-  description: "Seguros de vida, vehiculares y de protección Avanz.",
-};
-
-export default function SegurosPage() {
-  return (
-    <>
-      <PageHero
-        title="Seguros"
-        subtitle="Protección para vos, tu familia y tu patrimonio"
-      />
-      <ProductGrid category="seguro" audience="personas" />
-    </>
-  );
+// Ruta antigua sin prefijo de audiencia. El contenido vive ahora bajo
+// /personas/seguros (ver /[audience]/[slug]). next.config.ts ya redirige esta
+// URL; este stub es el respaldo.
+export default function Page() {
+  redirect("/personas/seguros");
 }
