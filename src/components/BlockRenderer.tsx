@@ -9,7 +9,7 @@ import PromotionsList from "@/components/sections/PromotionsList";
 import AppBanner, { type AppBannerProps } from "@/components/sections/AppBanner";
 import InfoCards, { type InfoCard } from "@/components/sections/InfoCards";
 import ProductGrid from "@/components/sections/ProductGrid";
-import RichText from "@/components/sections/RichText";
+import RichText, { type RichTextProps } from "@/components/sections/RichText";
 import SectionHeading, {
   type SectionHeadingProps,
 } from "@/components/sections/SectionHeading";
@@ -20,6 +20,26 @@ import ChannelsConverter, {
 import FeatureBanner, {
   type FeatureBannerProps,
 } from "@/components/sections/FeatureBanner";
+import MissionVision, {
+  type MissionVisionProps,
+} from "@/components/sections/MissionVision";
+import ValuesGrid, { type ValuesGridProps } from "@/components/sections/ValuesGrid";
+import Leaders, { type LeadersProps } from "@/components/sections/Leaders";
+import CardGrid, { type CardGridProps } from "@/components/sections/CardGrid";
+import DocumentGroup, {
+  type DocumentGroupProps,
+} from "@/components/sections/DocumentGroup";
+import PillNav, { type PillNavProps } from "@/components/sections/PillNav";
+import IconBlock, { type IconBlockProps } from "@/components/sections/IconBlock";
+import IconColumns, {
+  type IconColumnsProps,
+} from "@/components/sections/IconColumns";
+import QuoteBanner, {
+  type QuoteBannerProps,
+} from "@/components/sections/QuoteBanner";
+import SplitText, { type SplitTextProps } from "@/components/sections/SplitText";
+import MediaText, { type MediaTextProps } from "@/components/sections/MediaText";
+import RoleGrid, { type RoleGridProps } from "@/components/sections/RoleGrid";
 
 export default function BlockRenderer({ sections }: { sections: Section[] }) {
   return (
@@ -76,7 +96,7 @@ export default function BlockRenderer({ sections }: { sections: Section[] }) {
               />
             );
           case "sections.rich-text":
-            return <RichText key={key} body={section.body as string} />;
+            return <RichText key={key} {...(section as unknown as RichTextProps)} />;
           case "sections.section-heading":
             return (
               <SectionHeading key={key} {...(section as unknown as SectionHeadingProps)} />
@@ -96,6 +116,38 @@ export default function BlockRenderer({ sections }: { sections: Section[] }) {
             return (
               <FeatureBanner key={key} {...(section as unknown as FeatureBannerProps)} />
             );
+          case "sections.mission-vision":
+            return (
+              <MissionVision key={key} {...(section as unknown as MissionVisionProps)} />
+            );
+          case "sections.values-grid":
+            return <ValuesGrid key={key} {...(section as unknown as ValuesGridProps)} />;
+          case "sections.leaders":
+            return <Leaders key={key} {...(section as unknown as LeadersProps)} />;
+          case "sections.card-grid":
+            return <CardGrid key={key} {...(section as unknown as CardGridProps)} />;
+          case "sections.document-group":
+            return (
+              <DocumentGroup key={key} {...(section as unknown as DocumentGroupProps)} />
+            );
+          case "sections.pill-nav":
+            return <PillNav key={key} {...(section as unknown as PillNavProps)} />;
+          case "sections.icon-block":
+            return <IconBlock key={key} {...(section as unknown as IconBlockProps)} />;
+          case "sections.icon-columns":
+            return (
+              <IconColumns key={key} {...(section as unknown as IconColumnsProps)} />
+            );
+          case "sections.quote-banner":
+            return (
+              <QuoteBanner key={key} {...(section as unknown as QuoteBannerProps)} />
+            );
+          case "sections.split-text":
+            return <SplitText key={key} {...(section as unknown as SplitTextProps)} />;
+          case "sections.media-text":
+            return <MediaText key={key} {...(section as unknown as MediaTextProps)} />;
+          case "sections.role-grid":
+            return <RoleGrid key={key} {...(section as unknown as RoleGridProps)} />;
           default:
             return null;
         }

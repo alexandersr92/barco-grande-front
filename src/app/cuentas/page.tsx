@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getProducts } from "@/lib/strapi";
-import PageHero from "@/components/PageHero";
+import CategoryHero from "@/components/CategoryHero";
+import CategoryFilterNav from "@/components/CategoryFilterNav";
 import ProductListing from "@/components/ProductListing";
 
 export const metadata: Metadata = {
@@ -13,9 +14,19 @@ export default async function CuentasPage() {
 
   return (
     <>
-      <PageHero
+      <CategoryHero
         title="Cuentas"
-        subtitle="Te brindamos las mejores soluciones para tu ahorro"
+        subtitle="Asegura tu dinero, ahorra y recibe beneficios."
+        backgroundImage="/images/category-hero-family.jpg"
+        ctaLabel="Solicitala aquí"
+        ctaHref="/canales-de-atencion"
+      />
+      <CategoryFilterNav
+        items={products.map((p) => ({
+          id: p.documentId,
+          label: p.name,
+          href: `#${p.slug}`,
+        }))}
       />
       <ProductListing products={products} />
     </>

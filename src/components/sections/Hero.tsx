@@ -9,14 +9,34 @@ export interface HeroProps {
   subtitle?: string;
   image?: StrapiMedia | null;
   buttons?: ButtonItem[];
+  /** Color del panel translúcido: naranja (default) o azul petróleo. */
+  variant?: "primary" | "secondary";
+  /** Banner más bajo (680px del diseño) en vez del hero alto del home. */
+  compact?: boolean;
 }
 
-// Hero del diseño: foto a sangre completa con panel naranja translúcido a la izquierda.
-export default function Hero({ kicker, title, subtitle, image, buttons }: HeroProps) {
+// Hero del diseño: foto a sangre completa con panel translúcido a la izquierda.
+export default function Hero({
+  kicker,
+  title,
+  subtitle,
+  image,
+  buttons,
+  variant = "primary",
+  compact = false,
+}: HeroProps) {
   const imageUrl = getStrapiMedia(image);
+  const panelBg =
+    variant === "secondary"
+      ? "bg-[rgba(0,95,134,0.92)]"
+      : "bg-[rgba(255,117,0,0.85)]";
+  const heightCls = compact
+    ? "min-h-[420px] lg:h-[680px]"
+    : "min-h-[520px] lg:h-[768px]";
+  const innerMinH = compact ? "min-h-[420px]" : "min-h-[520px]";
 
   return (
-    <section className="relative min-h-[520px] overflow-hidden bg-surface lg:h-[768px]">
+    <section className={`relative overflow-hidden bg-surface ${heightCls}`}>
       {imageUrl && (
         <Image
           src={imageUrl}
@@ -27,8 +47,18 @@ export default function Hero({ kicker, title, subtitle, image, buttons }: HeroPr
           className="object-cover"
         />
       )}
-      <div className="relative flex h-full min-h-[520px] items-stretch">
-        <div className="relative flex w-full items-center justify-center bg-[rgba(255,117,0,0.85)] px-8 py-20 md:w-[41%] md:px-12 lg:py-0">
+      {/* En la variante compacta el panel no ocupa todo el alto: mide 380px y
+          se ancla abajo, como en los diseños de Sobre nosotros. */}
+      <div
+        className={`relative flex h-full ${innerMinH} ${
+          compact ? "items-end" : "items-stretch"
+        }`}
+      >
+        <div
+          className={`relative flex w-full items-center justify-center ${panelBg} px-8 py-20 md:w-[41%] md:px-12 lg:py-0 ${
+            compact ? "lg:h-[380px]" : ""
+          }`}
+        >
           {/* Ala decorativa */}
           <div className="pointer-events-none absolute -right-[88px] top-0 hidden lg:block">
             <Image

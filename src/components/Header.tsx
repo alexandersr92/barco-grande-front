@@ -4,40 +4,59 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import type { GlobalData } from "@/lib/strapi";
+import type { Audience, GlobalData, NavItem } from "@/lib/strapi";
 import { getStrapiMedia } from "@/lib/strapi";
 
-function isActiveTab(pathname: string, url: string): boolean {
-  if (url === "/") {
-    return pathname !== "/empresas" && !pathname.startsWith("/sobre-nosotros");
-  }
-  return pathname.startsWith(url);
+// Un ítem del menú está activo si su URL es la ruta actual, o si lo es la de
+// alguno de sus enlaces del dropdown (p. ej. "Productos" con /personas/cuentas).
+// El home de la audiencia (/personas) solo marca en coincidencia exacta, si no
+// quedaría siempre activo.
+function isNavItemActive(pathname: string, item: NavItem): boolean {
+  const matches = (url?: string) => {
+    if (!url || url === "#") return false;
+    if (url.split("/").filter(Boolean).length <= 1) return pathname === url;
+    return pathname === url || pathname.startsWith(`${url}/`);
+  };
+  return matches(item.url) || (item.links ?? []).some((l) => matches(l.url));
 }
 
-export default function Header({ global }: { global: GlobalData | null }) {
+export default function Header({
+  global,
+  audiences,
+}: {
+  global: GlobalData | null;
+  audiences: Audience[];
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const logoUrl = getStrapiMedia(global?.logo);
 
-  const audienceNav = global?.audienceNav ?? [];
-  const mainNav = global?.mainNav ?? [];
+  // La audiencia activa sale del primer segmento de la URL (/personas/cuentas
+  // → "personas"). Cada audiencia trae su propio menú desde Strapi, así que el
+  // menú de abajo cambia según la pestaña de arriba. En páginas fuera de toda
+  // audiencia (/noticias, /productos/...) se usa la primera como contexto.
+  const activeSlug = pathname.split("/")[1] ?? "";
+  const activeAudience =
+    audiences.find((a) => a.slug === activeSlug) ?? audiences[0];
+  const mainNav = activeAudience?.mainNav ?? [];
+  const homeUrl = activeAudience ? `/${activeAudience.slug}` : "/";
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       {/* Tabs Personas / Empresas / Sobre nosotros */}
       <div className="bg-primary">
         <div className="mx-auto flex max-w-[1220px] px-5">
-          {audienceNav.map((item) => {
-            const active = isActiveTab(pathname, item.url);
+          {audiences.map((aud) => {
+            const active = aud.slug === activeAudience?.slug;
             return (
               <Link
-                key={item.id}
-                href={item.url}
+                key={aud.id}
+                href={`/${aud.slug}`}
                 className={`px-5 pb-2.5 pt-[9px] text-sm leading-[22.4px] ${
                   active ? "bg-white text-primary" : "text-white hover:bg-white/10"
                 }`}
               >
-                {item.label}
+                {aud.name}
               </Link>
             );
           })}
@@ -46,7 +65,10 @@ export default function Header({ global }: { global: GlobalData | null }) {
 
       {/* Barra principal */}
       <div className="mx-auto flex max-w-[1220px] items-center justify-between px-5 py-2">
-        <Link href="/" className="flex w-[183px] shrink-0 items-center justify-center py-1">
+        <Link
+          href={homeUrl}
+          className="flex w-[183px] shrink-0 items-center justify-center py-1"
+        >
           {logoUrl ? (
             <Image
               src={logoUrl}
@@ -64,14 +86,15 @@ export default function Header({ global }: { global: GlobalData | null }) {
         </Link>
 
         <nav className="hidden items-center lg:flex">
-          {mainNav.map((item, i) => {
+          {mainNav.map((item) => {
             const hasLinks = item.links && item.links.length > 0;
+            const active = isNavItemActive(pathname, item);
             return (
               <div key={item.id} className="group relative">
                 <Link
                   href={item.url ?? "#"}
                   className={`flex items-center gap-[5px] px-[17px] py-2 text-sm uppercase leading-[22.4px] tracking-[1px] ${
-                    i === 0 ? "text-secondary" : "text-muted"
+                    active ? "text-secondary" : "text-muted"
                   } hover:text-primary`}
                 >
                   {item.label}
@@ -144,14 +167,14 @@ export default function Header({ global }: { global: GlobalData | null }) {
       {/* Menú móvil */}
       {open && (
         <div className="border-t border-gray-100 bg-white px-4 pb-4 lg:hidden">
-          {audienceNav.map((item) => (
+          {audiences.map((aud) => (
             <Link
-              key={`aud-${item.id}`}
-              href={item.url}
+              key={`aud-${aud.id}`}
+              href={`/${aud.slug}`}
               className="block py-2 font-semibold text-secondary"
               onClick={() => setOpen(false)}
             >
-              {item.label}
+              {aud.name}
             </Link>
           ))}
           {mainNav.map((item) => (

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 import "./globals.css";
-import { getGlobal } from "@/lib/strapi";
+import { getAudiences, getGlobal } from "@/lib/strapi";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AppDownloadBanner from "@/components/AppDownloadBanner";
@@ -29,12 +29,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const global = await getGlobal();
+  const [global, audiences] = await Promise.all([getGlobal(), getAudiences()]);
 
   return (
     <html lang="es" className={`${openSans.variable} h-full antialiased`}>
       <body className="flex min-h-screen flex-col">
-        <Header global={global} />
+        <Header global={global} audiences={audiences} />
         <main className="flex-1">{children}</main>
         <AppDownloadBanner
           appStoreUrl={global?.appStoreUrl}

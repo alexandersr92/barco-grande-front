@@ -115,6 +115,7 @@ export interface FaqItem {
 export interface DocumentLink {
   id: number;
   label: string;
+  description?: string;
   url?: string;
   file?: StrapiMedia | null;
 }
@@ -147,6 +148,7 @@ export interface Product {
   description?: string;
   introHeading?: string;
   benefitsIntro?: string;
+  tabsHeading?: string;
   heroTheme?: "light" | "dark";
   heroGradient?: string;
   featuresHeading?: string;
@@ -163,6 +165,31 @@ export interface Product {
   photo?: StrapiMedia | null;
   cardImage?: StrapiMedia | null;
   promoImage?: StrapiMedia | null;
+  order?: number;
+}
+
+// Cada pestaña principal del sitio (Personas / Empresas / Sobre nosotros).
+// Define su propio menú y agrupa sus páginas bajo /[slug]/...
+export interface Audience {
+  id: number;
+  documentId: string;
+  name: string;
+  slug: string;
+  mainNav: NavItem[];
+  order?: number;
+}
+
+export interface Channel {
+  id: number;
+  documentId: string;
+  name: string;
+  slug: string;
+  description?: string;
+  buttonLabel?: string;
+  buttonUrl?: string;
+  buttonIcon?: "none" | "phone";
+  features?: FeatureItem[];
+  image?: StrapiMedia | null;
   order?: number;
 }
 
@@ -197,6 +224,7 @@ export interface Page {
   documentId: string;
   title: string;
   slug: string;
+  audience?: Pick<Audience, "name" | "slug"> | null;
   sections: Section[];
   seo?: { metaTitle?: string; metaDescription?: string } | null;
 }
@@ -221,10 +249,19 @@ export async function getGlobal(): Promise<GlobalData | null> {
 
 // Los getters devuelven vacío si Strapi no está disponible (p. ej. build en
 // Vercel sin backend configurado) en lugar de romper el build.
-export async function getPage(slug: string): Promise<Page | null> {
+// Una página se identifica por su audiencia + slug: /personas/cuentas y
+// /empresas/cuentas comparten slug pero son páginas distintas. Sin `audience`
+// devuelve la primera coincidencia por slug (páginas globales).
+export async function getPage(
+  slug: string,
+  audience?: string,
+): Promise<Page | null> {
   try {
     const res = await fetchAPI<{ data: Page[] }>("/pages", {
     "filters[slug][$eq]": slug,
+    ...(audience ? { "filters[audience][slug][$eq]": audience } : {}),
+    "populate[audience][fields][0]": "name",
+    "populate[audience][fields][1]": "slug",
     "populate[seo]": "true",
     // La zona dinámica requiere populate por componente (sintaxis `on` de Strapi v5)
     // para alcanzar media anidada en componentes repetibles.
@@ -239,11 +276,29 @@ export async function getPage(slug: string): Promise<Page | null> {
     "populate[sections][on][sections.promotions-list][populate]": "*",
     "populate[sections][on][sections.app-banner][populate]": "*",
     "populate[sections][on][sections.channels-bar][populate]": "*",
+    "populate[sections][on][sections.mission-vision][populate]": "*",
+    "populate[sections][on][sections.values-grid][populate][items][populate]": "icon",
+    "populate[sections][on][sections.values-grid][populate][centerImage]": "true",
+    "populate[sections][on][sections.leaders][populate][leaders][populate]": "photo",
+    "populate[sections][on][sections.card-grid][populate][cards][populate]": "image",
+    "populate[sections][on][sections.document-group][populate][items][populate]": "file",
+    "populate[sections][on][sections.document-group][populate][image]": "true",
+    "populate[sections][on][sections.pill-nav][populate]": "items",
+    "populate[sections][on][sections.icon-block][populate]": "icon",
+    "populate[sections][on][sections.icon-columns][populate][items][populate]": "icon",
+    "populate[sections][on][sections.quote-banner][populate]": "image",
+    "populate[sections][on][sections.split-text][populate]": "*",
+    "populate[sections][on][sections.media-text][populate]": "images",
+    "populate[sections][on][sections.role-grid][populate]": "items",
     "populate[sections][on][sections.section-heading][fields][0]": "title",
     "populate[sections][on][sections.section-heading][fields][1]": "kicker",
     "populate[sections][on][sections.section-heading][fields][2]": "subtitle",
     "populate[sections][on][sections.section-heading][fields][3]": "align",
+    "populate[sections][on][sections.section-heading][fields][4]": "background",
+    "populate[sections][on][sections.section-heading][fields][5]": "maxWidth",
       "populate[sections][on][sections.rich-text][fields][0]": "body",
+      "populate[sections][on][sections.rich-text][fields][1]": "align",
+      "populate[sections][on][sections.rich-text][fields][2]": "maxWidth",
     });
     return res.data[0] ?? null;
   } catch {
@@ -259,6 +314,7 @@ export async function getProducts(
     "pagination[pageSize]": "100",
     "populate[photo]": "true",
     "populate[cardImage]": "true",
+    "populate[features]": "true",
   };
   if (filters.category) params["filters[category][$eq]"] = filters.category;
   if (filters.audience) params["filters[audience][$eq]"] = filters.audience;
@@ -291,6 +347,32 @@ export async function getProduct(slug: string): Promise<Product | null> {
     return res.data[0] ?? null;
   } catch {
     return null;
+  }
+}
+
+export async function getAudiences(): Promise<Audience[]> {
+  try {
+    const res = await fetchAPI<{ data: Audience[] }>("/audiences", {
+      sort: "order:asc",
+      "populate[mainNav][populate]": "links",
+    });
+    return res.data;
+  } catch {
+    return [];
+  }
+}
+
+export async function getChannels(): Promise<Channel[]> {
+  try {
+    const res = await fetchAPI<{ data: Channel[] }>("/channels", {
+      sort: "order:asc",
+      "pagination[pageSize]": "100",
+      "populate[image]": "true",
+      "populate[features]": "true",
+    });
+    return res.data;
+  } catch {
+    return [];
   }
 }
 

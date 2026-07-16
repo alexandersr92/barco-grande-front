@@ -6,6 +6,7 @@ import { getProduct, getProducts, getStrapiMedia } from "@/lib/strapi";
 import ProductTabs from "@/components/ProductTabs";
 import FaqAccordion from "@/components/FaqAccordion";
 import RewardPlans from "@/components/RewardPlans";
+import DocumentDownloadList from "@/components/DocumentDownloadList";
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -119,7 +120,7 @@ export default async function ProductPage({
                 alt=""
                 width={378}
                 height={380}
-                className="absolute left-[10%] top-[-40px] w-[378px] mix-blend-lighten"
+                className="absolute left-[8%] top-[-30px] w-[400px] opacity-25"
               />
               {cardUrl && (
                 <Image
@@ -128,7 +129,7 @@ export default async function ProductPage({
                   width={318}
                   height={345}
                   priority
-                  className="absolute left-[45%] top-[40px] w-[318px] drop-shadow-2xl"
+                  className="absolute left-[42%] top-[35px] w-[300px] rotate-[8deg] drop-shadow-2xl"
                 />
               )}
             </div>
@@ -234,10 +235,10 @@ export default async function ProductPage({
         </section>
       )}
 
-      {/* Lo que debes saber: tabs */}
+      {/* Lo que debes saber / Nuestros Beneficios: tabs */}
       <section className="mx-auto max-w-[1220px] px-8 pt-[90px]">
         <h2 className="pb-10 text-center text-[34px] leading-[1.2] tracking-[-1px] text-secondary md:text-[44px]">
-          Lo que debes saber
+          {product.tabsHeading ?? "Lo que debes saber"}
         </h2>
         <ProductTabs
           benefitsIntro={product.benefitsIntro}
@@ -266,45 +267,13 @@ export default async function ProductPage({
 
       {/* Descargar documentación */}
       {product.documents && product.documents.length > 0 && (
-        <section className="mx-auto max-w-[1180px] px-8 py-[90px]">
-          <h2 className="pb-8 text-center text-[34px] leading-[1.2] tracking-[-1px] text-secondary md:text-[44px]">
-            Descargar Documentación
-          </h2>
-          <div>
-            {product.documents.map((doc) => {
-              const fileUrl = getStrapiMedia(doc.file) ?? doc.url ?? "#";
-              return (
-                <a
-                  key={doc.id}
-                  href={fileUrl}
-                  target={fileUrl.startsWith("http") ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  className="group flex items-center justify-between gap-4 border-b border-line py-6"
-                >
-                  <span className="text-lg leading-[24.3px] text-secondary group-hover:text-primary">
-                    {doc.label}
-                  </span>
-                  <svg
-                    width="26"
-                    height="26"
-                    viewBox="0 0 26 26"
-                    fill="none"
-                    aria-hidden
-                    className="shrink-0 text-primary"
-                  >
-                    <path
-                      d="M13 3.5v12m0 0 4.5-4.5M13 15.5 8.5 11M4.5 19.5h17v3h-17v-3Z"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </a>
-              );
-            })}
-          </div>
-        </section>
+        <DocumentDownloadList
+          items={product.documents.map((doc) => ({
+            id: doc.id,
+            label: doc.label,
+            href: getStrapiMedia(doc.file) ?? doc.url ?? "#",
+          }))}
+        />
       )}
     </>
   );
