@@ -22,13 +22,20 @@ export interface LeadersProps {
 // "Nuestros líderes" (diseño 1506:25105): pestañas por grupo (Junta Directiva,
 // Gerencia, ...) y las personas del grupo activo. Los grupos salen de los
 // propios datos, así que agregar una pestaña es agregar líderes con ese group.
+const PER_PAGE = 3;
+
 export default function Leaders({ kicker, heading, leaders }: LeadersProps) {
   const groups = [...new Set((leaders ?? []).map((l) => l.group).filter(Boolean))] as string[];
   const [active, setActive] = useState(groups[0]);
+  const [pageIdx, setPageIdx] = useState(0);
 
   if (!leaders?.length) return null;
 
   const visible = active ? leaders.filter((l) => l.group === active) : leaders;
+  // Carrusel: páginas de 3 (diseño 1506:25225)
+  const pages = Math.max(1, Math.ceil(visible.length / PER_PAGE));
+  const page = Math.min(pageIdx, pages - 1);
+  const shown = visible.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
 
   return (
     <section className="mx-auto max-w-[1220px] px-5 py-[70px]">
@@ -53,7 +60,7 @@ export default function Leaders({ kicker, heading, leaders }: LeadersProps) {
               key={g}
               role="tab"
               aria-selected={g === active}
-              onClick={() => setActive(g)}
+              onClick={() => { setActive(g); setPageIdx(0); }}
               className={`-mb-px border-b-2 pb-3 text-[15px] transition-colors ${
                 g === active
                   ? "border-primary text-primary"
@@ -66,8 +73,20 @@ export default function Leaders({ kicker, heading, leaders }: LeadersProps) {
         </div>
       )}
 
-      <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-        {visible.map((l) => {
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          aria-label="Anterior"
+          onClick={() => setPageIdx(Math.max(0, page - 1))}
+          disabled={page === 0}
+          className="shrink-0 text-muted-light transition-opacity hover:text-primary disabled:opacity-35"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+            <path d="M12.5 4 6.5 10l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <div className="grid flex-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        {shown.map((l) => {
           // El diseño no trae fotos de líderes (solo nombre + cargo), pero el
           // campo existe por si más adelante se cargan desde Strapi.
           const photoUrl = getStrapiMedia(l.photo);
@@ -93,7 +112,33 @@ export default function Leaders({ kicker, heading, leaders }: LeadersProps) {
             </div>
           );
         })}
+        </div>
+        <button
+          type="button"
+          aria-label="Siguiente"
+          onClick={() => setPageIdx(Math.min(pages - 1, page + 1))}
+          disabled={page >= pages - 1}
+          className="shrink-0 text-muted-light transition-opacity hover:text-primary disabled:opacity-35"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+            <path d="M7.5 4l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
+
+      {pages > 1 && (
+        <div className="mt-8 flex justify-center gap-3">
+          {Array.from({ length: pages }, (_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Página ${i + 1}`}
+              onClick={() => setPageIdx(i)}
+              className={`h-2 w-2 rounded-[4px] ${i === page ? "bg-primary" : "bg-[#edbf99]"}`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

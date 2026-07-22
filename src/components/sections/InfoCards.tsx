@@ -66,17 +66,18 @@ export default function InfoCards({
                   >
                     {card.linkLabel ?? "Conocé más"}
                     <svg
-                      width="17"
-                      height="16"
-                      viewBox="0 0 17 16"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 21 21"
                       fill="none"
                       aria-hidden
                       className="text-primary"
                     >
+                      <circle cx="10.5" cy="10.5" r="9.5" stroke="currentColor" strokeWidth="1.4" />
                       <path
-                        d="M6 3.5 10.5 8 6 12.5"
+                        d="M8.5 6.8 12.2 10.5 8.5 14.2"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="1.6"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />

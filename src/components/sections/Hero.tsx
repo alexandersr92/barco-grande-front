@@ -35,6 +35,55 @@ export default function Hero({
     : "min-h-[520px] lg:h-[768px]";
   const innerMinH = compact ? "min-h-[420px]" : "min-h-[520px]";
 
+  // Variante compacta (Sobre Nosotros): la foto ocupa todo el banner y el
+  // panel de color es una caja de 380px anclada abajo a la izquierda, con el
+  // logo Avanz cruzando su borde derecho (diseño 1506:25108 y hermanos).
+  if (compact) {
+    return (
+      <section className={`relative overflow-hidden bg-surface ${heightCls}`}>
+        {imageUrl && (
+          <Image src={imageUrl} alt="" fill priority sizes="100vw" className="object-cover" />
+        )}
+        <div className="relative flex h-full min-h-[420px] items-end">
+          <div
+            className={`relative flex w-full items-center ${panelBg} px-8 py-12 md:w-[48%] md:px-[110px] lg:h-[380px] lg:py-0`}
+          >
+            <div className="max-w-[630px]">
+              {kicker && (
+                <p className="pb-4 text-sm uppercase leading-[22.4px] tracking-[1px] text-white/80">
+                  {kicker}
+                </p>
+              )}
+              <h1 className="pb-4 text-[34px] leading-[1.15] tracking-[-1px] text-white lg:text-[44px] lg:leading-[52.8px]">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="text-[17px] leading-7 text-white">{subtitle}</p>
+              )}
+              {buttons && buttons.length > 0 && (
+                <div className="mt-6 flex flex-wrap gap-4">
+                  {buttons.map((b) => (
+                    <CtaButton key={b.id} button={b} />
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Logo Avanz cruzando el borde derecho del panel */}
+            <div className="pointer-events-none absolute right-0 top-1/2 hidden h-[150px] w-[150px] -translate-y-1/2 translate-x-1/2 md:block">
+              <Image
+                src="/images/avanz-logo-white-outline.svg"
+                alt=""
+                fill
+                sizes="150px"
+                className="object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={`relative overflow-hidden bg-surface ${heightCls}`}>
       {imageUrl && (

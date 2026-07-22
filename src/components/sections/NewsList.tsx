@@ -32,7 +32,7 @@ export default async function NewsList({
         {showAllButton && (
           <Link
             href="/noticias"
-            className="border border-primary px-6 py-3 text-base text-primary transition-colors hover:bg-primary hover:text-white"
+            className="border border-secondary px-6 py-3 text-base text-secondary transition-colors hover:bg-secondary hover:text-white"
           >
             Leer más noticias
           </Link>

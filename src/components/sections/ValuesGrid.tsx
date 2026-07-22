@@ -16,7 +16,7 @@ function ValuesColumn({ items }: { items: IconFeature[] }) {
       {items.map((item) => {
         const iconUrl = getStrapiMedia(item.icon);
         return (
-          <div key={item.id} className="flex flex-col gap-3">
+          <div key={item.id} className="flex max-w-[300px] flex-col gap-3">
             {iconUrl && (
               <Image
                 src={iconUrl}
