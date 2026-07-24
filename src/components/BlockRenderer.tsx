@@ -40,6 +40,7 @@ import QuoteBanner, {
 import SplitText, { type SplitTextProps } from "@/components/sections/SplitText";
 import MediaText, { type MediaTextProps } from "@/components/sections/MediaText";
 import RoleGrid, { type RoleGridProps } from "@/components/sections/RoleGrid";
+import PhotoCta, { type PhotoCtaProps } from "@/components/sections/PhotoCta";
 
 export default function BlockRenderer({ sections }: { sections: Section[] }) {
   return (
@@ -148,6 +149,8 @@ export default function BlockRenderer({ sections }: { sections: Section[] }) {
             return <MediaText key={key} {...(section as unknown as MediaTextProps)} />;
           case "sections.role-grid":
             return <RoleGrid key={key} {...(section as unknown as RoleGridProps)} />;
+          case "sections.photo-cta":
+            return <PhotoCta key={key} {...(section as unknown as PhotoCtaProps)} />;
           default:
             return null;
         }

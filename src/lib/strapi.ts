@@ -290,6 +290,7 @@ export async function getPage(
     "populate[sections][on][sections.split-text][populate]": "*",
     "populate[sections][on][sections.media-text][populate]": "images",
     "populate[sections][on][sections.role-grid][populate]": "items",
+    "populate[sections][on][sections.photo-cta][populate]": "image",
     "populate[sections][on][sections.section-heading][fields][0]": "title",
     "populate[sections][on][sections.section-heading][fields][1]": "kicker",
     "populate[sections][on][sections.section-heading][fields][2]": "subtitle",
