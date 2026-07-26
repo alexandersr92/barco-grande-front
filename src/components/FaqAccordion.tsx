@@ -42,7 +42,7 @@ export default function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
               </svg>
             </button>
             {isOpen && faq.answer && (
-              <p className="pb-5 pr-10 text-[17px] leading-7 text-muted">{faq.answer}</p>
+              <p className="whitespace-pre-line pb-5 pr-10 text-[17px] leading-7 text-muted">{faq.answer}</p>
             )}
           </div>
         );

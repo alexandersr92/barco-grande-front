@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { FeatureItem } from "@/lib/strapi";
+import type { FeatureItem, TabSection } from "@/lib/strapi";
 import { CheckIcon } from "@/components/ui";
 
 interface Tab {
@@ -20,6 +20,7 @@ export default function ProductTabs({
   conditions,
   redeemIntro,
   redeemItems,
+  customTabs,
 }: {
   benefitsIntro?: string;
   benefits?: FeatureItem[];
@@ -27,8 +28,18 @@ export default function ProductTabs({
   conditions?: FeatureItem[];
   redeemIntro?: string;
   redeemItems?: FeatureItem[];
+  /** Pestañas definidas desde Strapi (etiqueta + intro + ítems); si existen,
+   *  reemplazan a las pestañas estándar. */
+  customTabs?: TabSection[];
 }) {
-  const tabs: Tab[] = [
+  const tabs: Tab[] = customTabs?.length
+    ? customTabs.map((t, i) => ({
+        key: `custom-${t.id ?? i}`,
+        label: t.label,
+        intro: t.intro,
+        items: t.items ?? [],
+      }))
+    : [
     { key: "beneficios", label: "Beneficios", intro: benefitsIntro, items: benefits ?? [] },
     { key: "requisitos", label: "Requisitos", items: requirements ?? [] },
     { key: "condiciones", label: "Condiciones", items: conditions ?? [] },
@@ -39,15 +50,18 @@ export default function ProductTabs({
       items: redeemItems ?? [],
     },
   ].filter((tab) => tab.items.length > 0 || tab.key === "beneficios");
+  const visibleTabs = customTabs?.length
+    ? tabs.filter((t) => t.items.length > 0 || t.intro)
+    : tabs;
 
-  const [active, setActive] = useState(tabs[0]?.key);
-  if (tabs.length === 0) return null;
-  const current = tabs.find((t) => t.key === active) ?? tabs[0];
+  const [active, setActive] = useState(visibleTabs[0]?.key);
+  if (visibleTabs.length === 0) return null;
+  const current = visibleTabs.find((t) => t.key === active) ?? visibleTabs[0];
 
   return (
     <div>
       <div className="flex flex-col border-b border-line sm:flex-row">
-        {tabs.map((tab) => {
+        {visibleTabs.map((tab) => {
           const isActive = tab.key === current.key;
           return (
             <button
@@ -67,13 +81,13 @@ export default function ProductTabs({
       </div>
       <div className="px-2.5 pt-8">
         {current.intro && (
-          <p className="pb-5 text-[17px] leading-7 text-secondary">{current.intro}</p>
+          <p className="whitespace-pre-line pb-5 text-[17px] leading-7 text-secondary">{current.intro}</p>
         )}
         <ul className="space-y-4">
           {current.items.map((item) => (
             <li key={item.id} className="flex items-start gap-3">
               <CheckIcon />
-              <span className="text-[17px] leading-7 text-muted">{item.text}</span>
+              <span className="whitespace-pre-line text-[17px] leading-7 text-muted">{item.text}</span>
             </li>
           ))}
           {current.items.length === 0 && (

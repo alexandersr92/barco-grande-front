@@ -14,8 +14,12 @@ export interface QuickLinkItem {
 export default function ProductLinks({ items }: { items: QuickLinkItem[] }) {
   if (!items || items.length === 0) return null;
 
+  // Con 3 ítems (Empresas) la grilla es de 3 columnas centradas; con 4+, de 4.
+  const cols = items.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3";
   return (
-    <section className="mx-auto grid max-w-[1220px] grid-cols-1 gap-5 px-5 py-10 sm:grid-cols-2 lg:grid-cols-4">
+    <section
+      className={`mx-auto grid max-w-[1220px] grid-cols-1 gap-5 px-5 py-10 sm:grid-cols-2 ${cols}`}
+    >
       {items.map((item) => {
         const iconUrl = getStrapiMedia(item.icon);
         return (
@@ -35,7 +39,7 @@ export default function ProductLinks({ items }: { items: QuickLinkItem[] }) {
                 />
               </div>
             )}
-            <span className="pl-2.5 text-[23px] leading-[30px] text-secondary transition-colors group-hover:text-primary">
+            <span className="pl-2.5 text-[20px] leading-[27px] text-secondary transition-colors group-hover:text-primary">
               {item.prefix && (
                 <>
                   {item.prefix}

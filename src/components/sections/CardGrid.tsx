@@ -20,7 +20,7 @@ export default function CardGrid({ heading, cards }: CardGridProps) {
           {heading}
         </h2>
       )}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className={`grid gap-6 ${cards.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
         {cards.map((card) => {
           const imageUrl = getStrapiMedia(card.image);
           return (

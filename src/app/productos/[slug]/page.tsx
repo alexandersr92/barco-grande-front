@@ -102,16 +102,16 @@ export default async function ProductPage({
               <h1 className="max-w-[340px] pb-5 text-[40px] leading-[1.15] tracking-[-1px] text-white md:text-[56px]">
                 {product.name}
               </h1>
-              {product.shortDescription && (
+              {(product.bannerCopy ?? product.shortDescription) && (
                 <p className="max-w-[420px] pb-5 text-[17px] leading-7 text-white">
-                  {product.shortDescription}
+                  {product.bannerCopy ?? product.shortDescription}
                 </p>
               )}
               <Link
-                href="/canales-de-atencion"
+                href={product.ctaUrl ?? "/personas/canales-de-atencion"}
                 className="inline-block bg-white px-[30px] pb-[15px] pt-[14px] text-base font-medium leading-[22.4px] text-primary transition-colors hover:bg-primary hover:text-white"
               >
-                Solicitalá aquí
+                {product.ctaLabel ?? "Solicitalá aquí"}
               </Link>
             </div>
             <div className="relative hidden min-h-[417px] flex-1 lg:block">
@@ -144,10 +144,18 @@ export default async function ProductPage({
                 <h1 className="pb-5 text-[40px] leading-[1.15] tracking-[-1px] text-secondary md:text-[56px]">
                   {product.name}
                 </h1>
-                {product.shortDescription && (
+                {(product.bannerCopy ?? product.shortDescription) && (
                   <p className="text-[17px] leading-7 text-muted">
-                    {product.shortDescription}
+                    {product.bannerCopy ?? product.shortDescription}
                   </p>
+                )}
+                {product.ctaLabel && product.ctaUrl && (
+                  <Link
+                    href={product.ctaUrl}
+                    className="mt-8 inline-block bg-primary px-[30px] pb-[15px] pt-[14px] text-base font-medium leading-[22.4px] text-white transition-colors hover:bg-primary-dark"
+                  >
+                    {product.ctaLabel}
+                  </Link>
                 )}
               </div>
             </div>
@@ -241,6 +249,7 @@ export default async function ProductPage({
           {product.tabsHeading ?? "Lo que debes saber"}
         </h2>
         <ProductTabs
+          customTabs={product.customTabs}
           benefitsIntro={product.benefitsIntro}
           benefits={product.benefits?.length ? product.benefits : product.features}
           requirements={product.requirements}

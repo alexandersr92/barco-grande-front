@@ -127,6 +127,13 @@ export interface IconFeature {
   icon?: StrapiMedia | null;
 }
 
+export interface TabSection {
+  id: number;
+  label: string;
+  intro?: string;
+  items?: FeatureItem[];
+}
+
 export interface RewardPlan {
   id: number;
   title: string;
@@ -149,6 +156,10 @@ export interface Product {
   introHeading?: string;
   benefitsIntro?: string;
   tabsHeading?: string;
+  bannerCopy?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  customTabs?: TabSection[];
   heroTheme?: "light" | "dark";
   heroGradient?: string;
   featuresHeading?: string;
@@ -343,6 +354,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
       "populate[featureBoxes][populate]": "icon",
       "populate[rewardPlans][populate]": "icon",
       "populate[redeemItems]": "true",
+      "populate[customTabs][populate]": "items",
       "populate[seo]": "true",
     });
     return res.data[0] ?? null;

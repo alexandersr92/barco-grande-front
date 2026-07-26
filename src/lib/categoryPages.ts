@@ -26,13 +26,14 @@ export const CATEGORY_PAGES: Record<string, CategoryPageConfig> = {
     subtitle:
       "¡Obtén una tarjeta de débito o crédito a tu medida! Vos podés personalizarla.",
     backgroundImage: "/images/category-hero-cards.jpg",
-    emphasized: true,
+    emphasized: false,
     tall: true,
     alternate: false,
     documents: [
       { id: 1, label: "Coberturas y sumas aseguradas", href: "#" },
       { id: 2, label: "Tabla de costos de tarjetas de crédito", href: "#" },
       { id: 3, label: "Información 3D Secure by Visa", href: "#" },
+      { id: 4, label: "Guía de Usuario de E-Banking", href: "#" },
     ],
   },
   creditos: {
