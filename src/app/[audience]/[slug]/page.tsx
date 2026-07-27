@@ -7,6 +7,7 @@ import PageHero from "@/components/PageHero";
 import CategoryListingPage from "@/components/pages/CategoryListingPage";
 import ChannelsPage from "@/components/pages/ChannelsPage";
 import ZonaDigitalBody from "@/components/pages/ZonaDigitalBody";
+import EmpresasTarjetasPage from "@/components/pages/EmpresasTarjetasPage";
 
 // Audiencias válidas para las plantillas de listado (evita que /xyz/cuentas
 // intente listar productos de una audiencia inexistente).
@@ -28,6 +29,7 @@ export async function generateMetadata({
   params: Promise<{ audience: string; slug: string }>;
 }): Promise<Metadata> {
   const { audience, slug } = await params;
+  if (audience === "empresas" && slug === "tarjetas") return { title: "Tarjetas" };
   const catConfig = CATEGORY_PAGES[slug];
   if (catConfig) return { title: catConfig.title };
   if (SPECIAL_TITLES[slug]) return { title: SPECIAL_TITLES[slug] };
@@ -45,6 +47,13 @@ export default async function AudiencePage({
   params: Promise<{ audience: string; slug: string }>;
 }) {
   const { audience, slug } = await params;
+
+  // /empresas/tarjetas tiene un diseño propio (Figma 1517:21038): dos
+  // tarjetas fijas, no el listado genérico. Se resuelve antes de caer en
+  // CATEGORY_PAGES, que sigue sirviendo a /personas/tarjetas.
+  if (audience === "empresas" && slug === "tarjetas") {
+    return <EmpresasTarjetasPage />;
+  }
 
   // Plantillas de listado: contenido filtrado por audiencia.
   const catConfig = CATEGORY_PAGES[slug];
