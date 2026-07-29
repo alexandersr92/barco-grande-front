@@ -1,19 +1,23 @@
 # Compose del frontend Next.js para Dokploy.
-# Definí NEXT_PUBLIC_STRAPI_URL en la sección Environment de Dokploy con la URL
-# pública del backend Strapi (https://...). Se usa en build y en runtime.
+# Variables requeridas en la sección Environment de Dokploy:
+#   NEXT_PUBLIC_STRAPI_URL  → URL pública del backend Strapi (https://...)
+#   STRAPI_INTERNAL_URL     → URL interna Docker del backend (http://<servicio>:1337)
+#   NEXT_PUBLIC_SITE_URL    → URL pública de este sitio (para SEO/metadata)
+# Sin defaults: si falta NEXT_PUBLIC_STRAPI_URL el build falla con un error
+# claro en vez de apuntar a un backend equivocado.
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        # Usa la variable de Dokploy si está; si no, cae al valor por defecto
-        # (la URL pública del backend). Evita que el build quede sin URL.
-        NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:-https://carnes-strapi-ca6779-82-180-133-127.traefik.me}
+        NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:?Definí NEXT_PUBLIC_STRAPI_URL en el environment de Dokploy}
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:-https://carnes-strapi-ca6779-82-180-133-127.traefik.me}
+      NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:?Definí NEXT_PUBLIC_STRAPI_URL en el environment de Dokploy}
+      STRAPI_INTERNAL_URL: ${STRAPI_INTERNAL_URL:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
     expose:
       - "3000"
     networks:

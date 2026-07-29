@@ -12,17 +12,25 @@ const openSans = Open_Sans({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+
 export const metadata: Metadata = {
+  ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
   title: {
     default: "Banco Avanz",
     template: "%s | Banco Avanz",
   },
   description: "Ponemos a disposición productos y servicios a tu medida.",
+  openGraph: {
+    siteName: "Banco Avanz",
+    type: "website",
+    locale: "es_NI",
+  },
 };
 
-// Renderizar en runtime (no pre-generar en el build): así el fetch de datos
-// usa la red interna de Docker, que solo existe con el contenedor corriendo.
-export const dynamic = "force-dynamic";
+// ISR: las páginas se cachean y se regeneran cada 5 minutos, así un cambio
+// en Strapi aparece solo sin redeploy y sin golpear el backend en cada visita.
+export const revalidate = 300;
 
 export default async function RootLayout({
   children,
@@ -37,6 +45,8 @@ export default async function RootLayout({
         <Header global={global} audiences={audiences} />
         <main className="flex-1">{children}</main>
         <AppDownloadBanner
+          title={global?.appBannerTitle}
+          text={global?.appBannerText}
           appStoreUrl={global?.appStoreUrl}
           playStoreUrl={global?.playStoreUrl}
         />

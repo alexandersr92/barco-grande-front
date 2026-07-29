@@ -6,7 +6,7 @@ import { getProduct, getProducts, getStrapiMedia } from "@/lib/strapi";
 import ProductTabs from "@/components/ProductTabs";
 import FaqAccordion from "@/components/FaqAccordion";
 import RewardPlans from "@/components/RewardPlans";
-import DocumentDownloadList from "@/components/DocumentDownloadList";
+import DocumentGroup from "@/components/sections/DocumentGroup";
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -26,13 +26,15 @@ export async function generateMetadata({
   };
 }
 
-const CATEGORY_LABEL: Record<string, { label: string; url: string }> = {
-  cuenta: { label: "Cuentas", url: "/cuentas" },
-  tarjeta: { label: "Tarjetas", url: "/tarjetas" },
-  credito: { label: "Créditos", url: "/creditos" },
-  seguro: { label: "Seguros", url: "/seguros" },
-  transferencia: { label: "Transferencias", url: "/transferencias" },
-  servicio: { label: "Servicios", url: "/servicios" },
+// Slug de listado por categoría; la URL final lleva el prefijo de la
+// audiencia del producto (/personas/cuentas, /empresas/tarjetas, ...).
+const CATEGORY_LABEL: Record<string, { label: string; slug: string }> = {
+  cuenta: { label: "Cuentas", slug: "cuentas" },
+  tarjeta: { label: "Tarjetas", slug: "tarjetas" },
+  credito: { label: "Créditos", slug: "creditos" },
+  seguro: { label: "Seguros", slug: "seguros" },
+  transferencia: { label: "Transferencias", slug: "transferencias" },
+  servicio: { label: "Servicios", slug: "servicios" },
 };
 
 function BreadcrumbSeparator() {
@@ -61,7 +63,7 @@ export default async function ProductPage({
   const category = CATEGORY_LABEL[product.category];
   const audienceLabel =
     product.audience === "empresas" ? "Banca Empresas" : "Banca Personas";
-  const audienceUrl = product.audience === "empresas" ? "/empresas" : "/";
+  const audienceUrl = product.audience === "empresas" ? "/empresas" : "/personas";
   const photoUrl = getStrapiMedia(product.photo);
   const promoUrl = getStrapiMedia(product.promoImage);
   const cardUrl = getStrapiMedia(product.cardImage);
@@ -77,10 +79,17 @@ export default async function ProductPage({
         <Link href={audienceUrl} className="text-primary hover:text-primary-dark">
           {audienceLabel}
         </Link>
-        <BreadcrumbSeparator />
-        <Link href={category.url} className="text-primary hover:text-primary-dark">
-          {category.label}
-        </Link>
+        {category && (
+          <>
+            <BreadcrumbSeparator />
+            <Link
+              href={`${audienceUrl}/${category.slug}`}
+              className="text-primary hover:text-primary-dark"
+            >
+              {category.label}
+            </Link>
+          </>
+        )}
         <BreadcrumbSeparator />
         <span className="text-muted">{product.name}</span>
       </div>
@@ -276,13 +285,7 @@ export default async function ProductPage({
 
       {/* Descargar documentación */}
       {product.documents && product.documents.length > 0 && (
-        <DocumentDownloadList
-          items={product.documents.map((doc) => ({
-            id: doc.id,
-            label: doc.label,
-            href: getStrapiMedia(doc.file) ?? doc.url ?? "#",
-          }))}
-        />
+        <DocumentGroup centered items={product.documents} />
       )}
     </>
   );

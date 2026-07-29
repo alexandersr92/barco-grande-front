@@ -1,11 +1,16 @@
 import Image from "next/image";
 
 // Banner "Descargá Avanz Móvil" con ola naranja y mockup del teléfono,
-// se muestra sobre el footer en todo el sitio.
+// se muestra sobre el footer en todo el sitio. Textos editables desde
+// Global en Strapi (appBannerTitle/appBannerText), con defaults del diseño.
 export default function AppDownloadBanner({
+  title,
+  text,
   appStoreUrl,
   playStoreUrl,
 }: {
+  title?: string;
+  text?: string;
   appStoreUrl?: string;
   playStoreUrl?: string;
 }) {
@@ -21,10 +26,10 @@ export default function AppDownloadBanner({
       <div className="relative mx-auto flex min-h-[524px] max-w-[1220px] flex-col items-center justify-end gap-10 px-5 pt-40 lg:flex-row lg:items-end lg:gap-[158px] lg:pt-24">
         <div className="flex w-full max-w-[600px] flex-col gap-6 pb-[60px]">
           <h2 className="text-[34px] font-medium leading-[1.2] tracking-[-1px] text-white md:text-[44px]">
-            Descargá Avanz Móvil, el banco en tus manos
+            {title ?? "Descargá Avanz Móvil, el banco en tus manos"}
           </h2>
           <p className="text-[17px] leading-7 text-white">
-            Realiza transferencias y maneja tus cuentas las 24 horas del día
+            {text ?? "Realiza transferencias y maneja tus cuentas las 24 horas del día"}
           </p>
           <div className="flex flex-wrap gap-4">
             <a

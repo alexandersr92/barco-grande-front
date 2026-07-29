@@ -18,7 +18,10 @@ export async function generateMetadata({
   const { audience } = await params;
   const page = await getPage("inicio", audience);
   return {
-    title: page?.seo?.metaTitle ?? page?.title ?? "Banco Avanz",
+    // metaTitle del CMS es el título completo (sin re-aplicar el template).
+    title: page?.seo?.metaTitle
+      ? { absolute: page.seo.metaTitle }
+      : (page?.title ?? "Banco Avanz"),
     description: page?.seo?.metaDescription ?? undefined,
   };
 }

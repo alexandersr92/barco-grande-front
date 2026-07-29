@@ -200,6 +200,8 @@ export default function Header({
           ))}
           <a
             href={global?.ebankingUrl ?? "#"}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-3 inline-block bg-primary px-4 py-2.5 text-[15px] text-white"
           >
             e-Banking

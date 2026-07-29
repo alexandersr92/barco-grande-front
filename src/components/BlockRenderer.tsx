@@ -8,7 +8,7 @@ import NewsList from "@/components/sections/NewsList";
 import PromotionsList from "@/components/sections/PromotionsList";
 import AppBanner, { type AppBannerProps } from "@/components/sections/AppBanner";
 import InfoCards, { type InfoCard } from "@/components/sections/InfoCards";
-import ProductGrid from "@/components/sections/ProductGrid";
+import ProductGrid, { type ProductGridProps } from "@/components/sections/ProductGrid";
 import RichText, { type RichTextProps } from "@/components/sections/RichText";
 import SectionHeading, {
   type SectionHeadingProps,
@@ -41,6 +41,15 @@ import SplitText, { type SplitTextProps } from "@/components/sections/SplitText"
 import MediaText, { type MediaTextProps } from "@/components/sections/MediaText";
 import RoleGrid, { type RoleGridProps } from "@/components/sections/RoleGrid";
 import PhotoCta, { type PhotoCtaProps } from "@/components/sections/PhotoCta";
+import TutorialTabs, {
+  type TutorialTabsProps,
+} from "@/components/sections/TutorialTabs";
+import ChecklistMedia, {
+  type ChecklistMediaProps,
+} from "@/components/sections/ChecklistMedia";
+import ChannelListingSection, {
+  type ChannelListingSectionProps,
+} from "@/components/sections/ChannelListingSection";
 
 export default function BlockRenderer({ sections }: { sections: Section[] }) {
   return (
@@ -89,12 +98,7 @@ export default function BlockRenderer({ sections }: { sections: Section[] }) {
             );
           case "sections.product-grid":
             return (
-              <ProductGrid
-                key={key}
-                heading={section.heading as string}
-                category={section.category as string}
-                audience={section.audience as string}
-              />
+              <ProductGrid key={key} {...(section as unknown as ProductGridProps)} />
             );
           case "sections.rich-text":
             return <RichText key={key} {...(section as unknown as RichTextProps)} />;
@@ -127,10 +131,14 @@ export default function BlockRenderer({ sections }: { sections: Section[] }) {
             return <Leaders key={key} {...(section as unknown as LeadersProps)} />;
           case "sections.card-grid":
             return <CardGrid key={key} {...(section as unknown as CardGridProps)} />;
-          case "sections.document-group":
+          case "sections.document-group": {
+            const { layout, ...doc } = section as unknown as DocumentGroupProps & {
+              layout?: "split" | "centered";
+            };
             return (
-              <DocumentGroup key={key} {...(section as unknown as DocumentGroupProps)} />
+              <DocumentGroup key={key} {...doc} centered={layout === "centered"} />
             );
+          }
           case "sections.pill-nav":
             return <PillNav key={key} {...(section as unknown as PillNavProps)} />;
           case "sections.icon-block":
@@ -151,6 +159,24 @@ export default function BlockRenderer({ sections }: { sections: Section[] }) {
             return <RoleGrid key={key} {...(section as unknown as RoleGridProps)} />;
           case "sections.photo-cta":
             return <PhotoCta key={key} {...(section as unknown as PhotoCtaProps)} />;
+          case "sections.tutorial-tabs":
+            return (
+              <TutorialTabs key={key} {...(section as unknown as TutorialTabsProps)} />
+            );
+          case "sections.checklist-media":
+            return (
+              <ChecklistMedia
+                key={key}
+                {...(section as unknown as ChecklistMediaProps)}
+              />
+            );
+          case "sections.channel-listing":
+            return (
+              <ChannelListingSection
+                key={key}
+                {...(section as unknown as ChannelListingSectionProps)}
+              />
+            );
           default:
             return null;
         }

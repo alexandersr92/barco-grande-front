@@ -47,7 +47,7 @@ function PhoneIcon() {
 }
 
 // Listado de canales de atención (diseño 1506:31438): filas de 3 columnas
-// —imagen de color, título + descripción + botón, y lista "Caracteristicas"—
+// —imagen de color, título + descripción + botón, y lista "Características"—
 // separadas por una línea horizontal. El id de cada fila (slug) sirve de ancla
 // para las píldoras del filtro superior.
 export default function ChannelListing({ channels }: { channels: Channel[] }) {
@@ -102,7 +102,7 @@ export default function ChannelListing({ channels }: { channels: Channel[] }) {
             {/* Características */}
             <div className="flex flex-col">
               <h3 className="text-[20px] leading-[1.3] tracking-[-0.5px] text-secondary lg:text-[22px]">
-                Caracteristicas
+                Características
               </h3>
               {ch.features && ch.features.length > 0 && (
                 <ul className="mt-6 space-y-5">

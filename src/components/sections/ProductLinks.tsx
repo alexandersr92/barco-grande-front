@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { StrapiMedia } from "@/lib/strapi";
 import { getStrapiMedia } from "@/lib/strapi";
+import { CircleArrowIcon } from "@/components/icons";
 
 export interface QuickLinkItem {
   id: number;
@@ -48,23 +49,7 @@ export default function ProductLinks({ items }: { items: QuickLinkItem[] }) {
               )}
               <span className="inline-flex items-center gap-2">
                 {item.label}
-                <svg
-                  width="21"
-                  height="21"
-                  viewBox="0 0 21 21"
-                  fill="none"
-                  aria-hidden
-                  className="text-primary"
-                >
-                  <circle cx="10.5" cy="10.5" r="9.5" stroke="currentColor" strokeWidth="1.4" />
-                  <path
-                    d="M8.5 6.8 12.2 10.5 8.5 14.2"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <CircleArrowIcon size={21} />
               </span>
             </span>
           </Link>

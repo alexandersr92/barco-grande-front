@@ -3,7 +3,7 @@ import ProductShowcase from "@/components/sections/ProductShowcase";
 
 // Lista de productos como secciones alternadas (imagen izquierda/derecha),
 // siguiendo el patrón de las páginas de categoría del diseño (fondo blanco
-// continuo, sin franjas; cada sección es un ancla para CategoryFilterNav).
+// continuo, sin franjas; cada sección es un ancla para PillNav).
 // `emphasized`/`tall` activan la variante tarjetas (texto negrita, foto
 // retrato con la tarjeta flotante superpuesta).
 export default function ProductListing({
@@ -11,12 +11,17 @@ export default function ProductListing({
   emphasized = false,
   tall = false,
   alternate = true,
+  ctaLabel = "Solicitala aqui",
+  detailLabel = "Ver más detalles",
 }: {
   products: Product[];
   emphasized?: boolean;
   tall?: boolean;
   /** Alterna imagen izquierda/derecha (cuentas). En tarjetas es siempre izquierda. */
   alternate?: boolean;
+  /** Textos de los botones de cada producto (editables desde la sección). */
+  ctaLabel?: string;
+  detailLabel?: string;
 }) {
   return (
     <div className="bg-white">
@@ -35,13 +40,13 @@ export default function ProductListing({
           buttons={[
             {
               id: 1,
-              label: "Solicitala aqui",
+              label: ctaLabel,
               url: `/productos/${product.slug}`,
               variant: "primary",
             },
             {
               id: 2,
-              label: "Ver más detalles",
+              label: detailLabel,
               url: `/productos/${product.slug}`,
               variant: "link",
             },

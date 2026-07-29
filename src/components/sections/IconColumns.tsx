@@ -9,6 +9,8 @@ export interface IconColumnsProps {
   items?: IconFeature[];
   /** Líneas verticales entre columnas. */
   dividers?: boolean;
+  /** Tamaño del ícono en px (50 en pilares, 120 en zona digital). */
+  iconSize?: number;
 }
 
 // Columnas centradas con ícono + título + descripción. El número de columnas
@@ -19,6 +21,7 @@ export default function IconColumns({
   anchorId,
   items,
   dividers = false,
+  iconSize = 50,
 }: IconColumnsProps) {
   if (!items?.length) return null;
 
@@ -60,9 +63,10 @@ export default function IconColumns({
                 <Image
                   src={iconUrl}
                   alt=""
-                  width={50}
-                  height={50}
-                  className="h-[50px] w-[50px] object-contain"
+                  width={iconSize}
+                  height={iconSize}
+                  style={{ width: iconSize, height: iconSize }}
+                  className="object-contain"
                 />
               )}
               <h3 className="text-[24px] leading-[1.3] tracking-[-1px] text-secondary md:text-[28px] md:leading-[36.4px]">

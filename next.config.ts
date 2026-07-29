@@ -1,23 +1,21 @@
 import type { NextConfig } from "next";
 
-// ⚠️ MALA PRÁCTICA DELIBERADA: el backend usa un certificado SSL auto-firmado
-// y Node rechazaría la conexión. Desactivamos la validación TLS de todo el
-// proceso del servidor Next para que el fetch de datos y la optimización de
-// imágenes puedan hablar con el backend. Reemplazar por un cert válido
-// (Let's Encrypt con un dominio propio) antes de producción real.
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
-// URL del backend quemada directamente (sin depender de variables de entorno
-// en el panel de deploy). En local, .env.local la sobreescribe con localhost.
-const FALLBACK_STRAPI_URL =
-  "https://carnes-strapi-ca6779-82-180-133-127.traefik.me";
-const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || FALLBACK_STRAPI_URL;
-let strapiHost: URL;
-try {
-  strapiHost = new URL(strapiUrl);
-} catch {
-  strapiHost = new URL(FALLBACK_STRAPI_URL);
+// La URL del backend viene SIEMPRE de la variable de entorno (en dev la fija
+// .env.local; en el deploy, el panel de Dokploy). Sin fallback: si falta, el
+// build falla acá con un mensaje claro en vez de servir contenido de un
+// origen equivocado.
+const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL;
+if (!strapiUrl) {
+  throw new Error(
+    "NEXT_PUBLIC_STRAPI_URL no está definida. Configurala en .env.local (dev) o en las variables de entorno del deploy.",
+  );
 }
+const strapiHost = new URL(strapiUrl);
+
+// El optimizador de imágenes solo puede resolver IPs locales cuando el propio
+// backend es local (dev). En producción queda bloqueado (mitiga SSRF).
+const strapiIsLocal =
+  strapiHost.hostname === "localhost" || strapiHost.hostname === "127.0.0.1";
 
 // Las páginas de Personas viven bajo /personas/*. Las URLs viejas sin prefijo
 // redirigen ahí para no romper enlaces existentes y mantener la simetría con
@@ -34,15 +32,19 @@ const PERSONAS_SLUGS = [
 ];
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   async redirects() {
     return PERSONAS_SLUGS.map((slug) => ({
       source: `/${slug}`,
       destination: `/personas/${slug}`,
-      permanent: false,
+      permanent: true,
     }));
   },
   images: {
-    dangerouslyAllowLocalIP: true,
+    dangerouslyAllowLocalIP: strapiIsLocal,
+    // El logo y los íconos sociales son SVG servidos desde la media library de
+    // Strapi (subidos solo por admins). Se sirven con las mitigaciones que
+    // recomienda Next: sin ejecución de scripts y como attachment.
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
@@ -52,11 +54,6 @@ const nextConfig: NextConfig = {
         hostname: strapiHost.hostname,
         port: strapiHost.port,
         pathname: "/uploads/**",
-      },
-      // Media Library de Strapi Cloud / proveedores S3 comunes
-      {
-        protocol: "https",
-        hostname: "*.media.strapiapp.com",
       },
     ],
   },

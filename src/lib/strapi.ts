@@ -1,15 +1,21 @@
-// `||` (no `??`) para que un string vacío —como el que a veces inyecta el
-// entorno de deploy— también caiga al default. En local, .env.local fija
-// http://localhost:1337, así que el default de producción no afecta el dev.
+import { cache } from "react";
+
 // URL PÚBLICA: la que ve el navegador (para construir URLs de imágenes/media).
-const STRAPI_URL =
-  process.env.NEXT_PUBLIC_STRAPI_URL ||
-  "https://carnes-strapi-ca6779-82-180-133-127.traefik.me";
+// `||` (no `??`) para que un string vacío —como el que a veces inyecta el
+// entorno de deploy— también cuente como ausente. Sin fallback hardcodeado:
+// si falta, se corta acá con un error claro (next.config.ts ya la valida en
+// build, esto cubre el runtime).
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "";
+if (!STRAPI_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_STRAPI_URL no está definida. Configurala en .env.local (dev) o en las variables de entorno del deploy.",
+  );
+}
 
 // URL INTERNA para el fetch server-side. En el VPS, el contenedor del frontend
 // habla con el del backend por la red interna de Docker (HTTP, sin pasar por
-// el dominio público → evita problemas de hairpin/SSL). Si no se define,
-// usa la pública.
+// el dominio público → evita hairpin y la necesidad de validar TLS contra el
+// cert público). Si no se define, usa la pública.
 const STRAPI_API_URL = process.env.STRAPI_INTERNAL_URL || STRAPI_URL;
 
 // Para URLs de media (las carga el navegador): siempre pública.
@@ -32,7 +38,7 @@ export async function fetchAPI<T = unknown>(
 
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
-    next: { revalidate: 60 },
+    next: { revalidate: 300 },
     // Corta rápido si Strapi no responde (p. ej. build sin backend accesible),
     // para no colgar el build hasta el timeout de Next.
     signal: AbortSignal.timeout(15000),
@@ -42,6 +48,13 @@ export async function fetchAPI<T = unknown>(
     throw new Error(`Error consultando Strapi (${res.status}): ${url}`);
   }
   return res.json() as Promise<T>;
+}
+
+// Los getters devuelven vacío ante errores para no tumbar la página, pero
+// SIEMPRE dejan registro: un backend caído debe verse en los logs, no pasar
+// en silencio.
+function logStrapiError(fn: string, err: unknown) {
+  console.error(`[strapi] ${fn} falló:`, err instanceof Error ? err.message : err);
 }
 
 // ——— Tipos ———
@@ -100,6 +113,8 @@ export interface GlobalData {
   playStoreUrl?: string;
   usdBuy?: number;
   usdSell?: number;
+  appBannerTitle?: string;
+  appBannerText?: string;
   footerColumns: FooterColumn[];
   address?: string;
   phone?: string;
@@ -242,7 +257,7 @@ export interface Page {
 
 // ——— Consultas ———
 
-export async function getGlobal(): Promise<GlobalData | null> {
+async function getGlobalImpl(): Promise<GlobalData | null> {
   try {
     const res = await fetchAPI<{ data: GlobalData }>("/global", {
       "populate[logo]": "true",
@@ -253,7 +268,8 @@ export async function getGlobal(): Promise<GlobalData | null> {
       "populate[footerColumns][populate]": "links",
     });
     return res.data;
-  } catch {
+  } catch (err) {
+    logStrapiError("getGlobal", err);
     return null;
   }
 }
@@ -263,7 +279,7 @@ export async function getGlobal(): Promise<GlobalData | null> {
 // Una página se identifica por su audiencia + slug: /personas/cuentas y
 // /empresas/cuentas comparten slug pero son páginas distintas. Sin `audience`
 // devuelve la primera coincidencia por slug (páginas globales).
-export async function getPage(
+async function getPageImpl(
   slug: string,
   audience?: string,
 ): Promise<Page | null> {
@@ -302,6 +318,10 @@ export async function getPage(
     "populate[sections][on][sections.media-text][populate]": "images",
     "populate[sections][on][sections.role-grid][populate]": "items",
     "populate[sections][on][sections.photo-cta][populate]": "image",
+    "populate[sections][on][sections.tutorial-tabs][populate][tabs][populate][cards][populate]": "image",
+    "populate[sections][on][sections.checklist-media][populate][items]": "true",
+    "populate[sections][on][sections.checklist-media][populate][image]": "true",
+    "populate[sections][on][sections.channel-listing][populate]": "*",
     "populate[sections][on][sections.section-heading][fields][0]": "title",
     "populate[sections][on][sections.section-heading][fields][1]": "kicker",
     "populate[sections][on][sections.section-heading][fields][2]": "subtitle",
@@ -313,12 +333,13 @@ export async function getPage(
       "populate[sections][on][sections.rich-text][fields][2]": "maxWidth",
     });
     return res.data[0] ?? null;
-  } catch {
+  } catch (err) {
+    logStrapiError("getPage", err);
     return null;
   }
 }
 
-export async function getProducts(
+async function getProductsImpl(
   filters: { category?: string; audience?: string } = {},
 ): Promise<Product[]> {
   const params: Record<string, string> = {
@@ -333,12 +354,13 @@ export async function getProducts(
   try {
     const res = await fetchAPI<{ data: Product[] }>("/products", params);
     return res.data;
-  } catch {
+  } catch (err) {
+    logStrapiError("getProducts", err);
     return [];
   }
 }
 
-export async function getProduct(slug: string): Promise<Product | null> {
+async function getProductImpl(slug: string): Promise<Product | null> {
   try {
     const res = await fetchAPI<{ data: Product[] }>("/products", {
       "filters[slug][$eq]": slug,
@@ -358,24 +380,26 @@ export async function getProduct(slug: string): Promise<Product | null> {
       "populate[seo]": "true",
     });
     return res.data[0] ?? null;
-  } catch {
+  } catch (err) {
+    logStrapiError("getProduct", err);
     return null;
   }
 }
 
-export async function getAudiences(): Promise<Audience[]> {
+async function getAudiencesImpl(): Promise<Audience[]> {
   try {
     const res = await fetchAPI<{ data: Audience[] }>("/audiences", {
       sort: "order:asc",
       "populate[mainNav][populate]": "links",
     });
     return res.data;
-  } catch {
+  } catch (err) {
+    logStrapiError("getAudiences", err);
     return [];
   }
 }
 
-export async function getChannels(): Promise<Channel[]> {
+async function getChannelsImpl(): Promise<Channel[]> {
   try {
     const res = await fetchAPI<{ data: Channel[] }>("/channels", {
       sort: "order:asc",
@@ -384,12 +408,13 @@ export async function getChannels(): Promise<Channel[]> {
       "populate[features]": "true",
     });
     return res.data;
-  } catch {
+  } catch (err) {
+    logStrapiError("getChannels", err);
     return [];
   }
 }
 
-export async function getArticles(limit = 100): Promise<Article[]> {
+async function getArticlesImpl(limit = 100): Promise<Article[]> {
   try {
     const res = await fetchAPI<{ data: Article[] }>("/articles", {
       sort: "date:desc",
@@ -397,31 +422,47 @@ export async function getArticles(limit = 100): Promise<Article[]> {
       "populate[image]": "true",
     });
     return res.data;
-  } catch {
+  } catch (err) {
+    logStrapiError("getArticles", err);
     return [];
   }
 }
 
-export async function getArticle(slug: string): Promise<Article | null> {
+async function getArticleImpl(slug: string): Promise<Article | null> {
   try {
     const res = await fetchAPI<{ data: Article[] }>("/articles", {
       "filters[slug][$eq]": slug,
-      populate: "*",
+      "populate[image]": "true",
     });
     return res.data[0] ?? null;
-  } catch {
+  } catch (err) {
+    logStrapiError("getArticle", err);
     return null;
   }
 }
 
-export async function getPromotions(limit = 100): Promise<Promotion[]> {
+async function getPromotionsImpl(limit = 100): Promise<Promotion[]> {
   try {
     const res = await fetchAPI<{ data: Promotion[] }>("/promotions", {
       "pagination[pageSize]": String(limit),
       "populate[image]": "true",
     });
     return res.data;
-  } catch {
+  } catch (err) {
+    logStrapiError("getPromotions", err);
     return [];
   }
 }
+
+// ——— Exports ———
+// cache() deduplica llamadas repetidas dentro del mismo request (varias
+// secciones pidiendo global/productos no multiplican los fetch).
+export const getGlobal = cache(getGlobalImpl);
+export const getPage = cache(getPageImpl);
+export const getProducts = cache(getProductsImpl);
+export const getProduct = cache(getProductImpl);
+export const getAudiences = cache(getAudiencesImpl);
+export const getChannels = cache(getChannelsImpl);
+export const getArticles = cache(getArticlesImpl);
+export const getArticle = cache(getArticleImpl);
+export const getPromotions = cache(getPromotionsImpl);

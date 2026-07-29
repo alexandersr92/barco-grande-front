@@ -1,17 +1,57 @@
 import { getProducts } from "@/lib/strapi";
 import { CtaButton } from "@/components/ui";
+import PillNav from "@/components/sections/PillNav";
+import ProductListing from "@/components/ProductListing";
+
+export interface ProductGridProps {
+  heading?: string;
+  category?: string;
+  audience?: string;
+  /** listing: showcases apilados con barra de píldoras (páginas de categoría).
+   * grid: tarjetas en cuadrícula (default). */
+  layout?: "grid" | "listing";
+  tall?: boolean;
+  emphasized?: boolean;
+  alternate?: boolean;
+  ctaLabel?: string;
+  detailLabel?: string;
+}
 
 export default async function ProductGrid({
   heading,
   category,
   audience,
-}: {
-  heading?: string;
-  category?: string;
-  audience?: string;
-}) {
+  layout = "grid",
+  tall = false,
+  emphasized = false,
+  alternate = true,
+  ctaLabel,
+  detailLabel,
+}: ProductGridProps) {
   const products = await getProducts({ category, audience });
   if (products.length === 0) return null;
+
+  if (layout === "listing") {
+    return (
+      <>
+        <PillNav
+          items={products.map((p) => ({
+            id: p.id,
+            label: p.name,
+            url: `#${p.slug}`,
+          }))}
+        />
+        <ProductListing
+          products={products}
+          emphasized={emphasized}
+          tall={tall}
+          alternate={alternate}
+          ctaLabel={ctaLabel || undefined}
+          detailLabel={detailLabel || undefined}
+        />
+      </>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-20">
@@ -34,7 +74,7 @@ export default async function ProductGrid({
               <CtaButton
                 button={{
                   id: product.id,
-                  label: "Solicitala aqui",
+                  label: ctaLabel || "Solicitala aqui",
                   url: `/productos/${product.slug}`,
                   variant: "primary",
                 }}
@@ -42,7 +82,7 @@ export default async function ProductGrid({
               <CtaButton
                 button={{
                   id: -product.id,
-                  label: "Ver más detalles",
+                  label: detailLabel || "Ver más detalles",
                   url: `/productos/${product.slug}`,
                   variant: "link",
                 }}

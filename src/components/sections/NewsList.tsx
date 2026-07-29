@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getArticles, getStrapiMedia } from "@/lib/strapi";
+import { CircleArrowIcon } from "@/components/icons";
 
 function formatDate(date?: string): string {
   if (!date) return "";
@@ -76,23 +77,7 @@ export default async function NewsList({
                 >
                   Leer más
                 </Link>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 21 21"
-                  fill="none"
-                  aria-hidden
-                  className="text-primary"
-                >
-                  <circle cx="10.5" cy="10.5" r="9.5" stroke="currentColor" strokeWidth="1.4" />
-                  <path
-                    d="M8.5 6.8 12.2 10.5 8.5 14.2"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <CircleArrowIcon size={18} />
               </div>
             </article>
           );
