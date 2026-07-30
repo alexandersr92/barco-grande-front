@@ -18,14 +18,13 @@ if (!STRAPI_URL) {
 // cert público). Si no se define, usa la pública.
 const STRAPI_API_URL = process.env.STRAPI_INTERNAL_URL || STRAPI_URL;
 
-// Para URLs de media (las carga el navegador): siempre pública.
-export function getStrapiURL(path = ""): string {
-  return `${STRAPI_URL}${path}`;
-}
-
+// URLs de media: relativas (/uploads/...) — las sirve el propio dominio del
+// sitio, que las proxya al backend vía rewrite (next.config.ts). Evita que el
+// navegador y el optimizador de imágenes dependan del dominio/cert de Strapi.
+// Si el provider de uploads devolviera URLs absolutas (S3, etc.), se respetan.
 export function getStrapiMedia(media?: StrapiMedia | null): string | null {
   if (!media?.url) return null;
-  return media.url.startsWith("http") ? media.url : getStrapiURL(media.url);
+  return media.url;
 }
 
 export async function fetchAPI<T = unknown>(

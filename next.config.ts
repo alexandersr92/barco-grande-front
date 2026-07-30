@@ -33,6 +33,18 @@ const PERSONAS_SLUGS = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // La media de Strapi se sirve por el propio dominio del sitio (/uploads/*)
+  // y se proxya al backend por la red interna: así el optimizador de imágenes
+  // y el navegador nunca dependen del certificado del dominio del backend.
+  async rewrites() {
+    const mediaTarget = process.env.STRAPI_INTERNAL_URL || strapiUrl;
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: `${mediaTarget}/uploads/:path*`,
+      },
+    ];
+  },
   async redirects() {
     return PERSONAS_SLUGS.map((slug) => ({
       source: `/${slug}`,
