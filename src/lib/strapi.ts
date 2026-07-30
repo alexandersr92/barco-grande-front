@@ -18,13 +18,18 @@ if (!STRAPI_URL) {
 // cert público). Si no se define, usa la pública.
 const STRAPI_API_URL = process.env.STRAPI_INTERNAL_URL || STRAPI_URL;
 
-// URLs de media: relativas (/uploads/...) — las sirve el propio dominio del
-// sitio, que las proxya al backend vía rewrite (next.config.ts). Evita que el
-// navegador y el optimizador de imágenes dependan del dominio/cert de Strapi.
+// URLs de media: se sirven por el PROPIO dominio del sitio (/uploads/*, que
+// el rewrite de next.config.ts proxya al backend por la red interna). Así ni
+// el navegador ni el optimizador dependen del dominio/cert de Strapi.
+// En producción la URL es absoluta al dominio del sitio: el optimizador de
+// next/image la trata como remota y la baja por HTTP real (los rewrites no
+// aplican a su fetch interno de rutas relativas en modo standalone). En dev,
+// sin NEXT_PUBLIC_SITE_URL, queda relativa y la resuelve el dev server.
 // Si el provider de uploads devolviera URLs absolutas (S3, etc.), se respetan.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "";
 export function getStrapiMedia(media?: StrapiMedia | null): string | null {
   if (!media?.url) return null;
-  return media.url;
+  return media.url.startsWith("http") ? media.url : `${SITE_URL}${media.url}`;
 }
 
 export async function fetchAPI<T = unknown>(

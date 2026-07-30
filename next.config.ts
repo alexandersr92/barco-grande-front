@@ -12,8 +12,14 @@ if (!strapiUrl) {
 }
 const strapiHost = new URL(strapiUrl);
 
-// El optimizador de imágenes solo puede resolver IPs locales cuando el propio
-// backend es local (dev). En producción queda bloqueado (mitiga SSRF).
+// Dominio público del sitio: en producción la media se referencia como URL
+// absoluta a este dominio (ver getStrapiMedia) y hay que permitirla en el
+// optimizador de imágenes.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const siteHost = siteUrl ? new URL(siteUrl) : null;
+
+// El optimizador solo puede resolver IPs locales en dev (backend en
+// localhost). En producción queda bloqueado (mitiga SSRF).
 const strapiIsLocal =
   strapiHost.hostname === "localhost" || strapiHost.hostname === "127.0.0.1";
 
@@ -67,6 +73,18 @@ const nextConfig: NextConfig = {
         port: strapiHost.port,
         pathname: "/uploads/**",
       },
+      // La media en producción se sirve como URL absoluta del propio sitio
+      // (proxy /uploads → Strapi por red interna).
+      ...(siteHost
+        ? [
+            {
+              protocol: siteHost.protocol.replace(":", "") as "http" | "https",
+              hostname: siteHost.hostname,
+              port: siteHost.port,
+              pathname: "/uploads/**",
+            },
+          ]
+        : []),
     ],
   },
 };
