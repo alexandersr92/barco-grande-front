@@ -108,6 +108,7 @@ export interface SocialLink {
 export interface GlobalData {
   siteName: string;
   logo?: StrapiMedia | null;
+  favicon?: StrapiMedia | null;
   topNav: LinkItem[];
   audienceNav: LinkItem[];
   mainNav: NavItem[];
@@ -265,6 +266,7 @@ async function getGlobalImpl(): Promise<GlobalData | null> {
   try {
     const res = await fetchAPI<{ data: GlobalData }>("/global", {
       "populate[logo]": "true",
+      "populate[favicon]": "true",
       "populate[topNav]": "true",
       "populate[audienceNav]": "true",
       "populate[mainNav][populate]": "links",

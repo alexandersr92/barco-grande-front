@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 import "./globals.css";
-import { getAudiences, getGlobal } from "@/lib/strapi";
+import { getAudiences, getGlobal, getStrapiMedia } from "@/lib/strapi";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AppDownloadBanner from "@/components/AppDownloadBanner";
@@ -14,19 +14,26 @@ const openSans = Open_Sans({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 
-export const metadata: Metadata = {
-  ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
-  title: {
-    default: "Banco Avanz",
-    template: "%s | Banco Avanz",
-  },
-  description: "Ponemos a disposición productos y servicios a tu medida.",
-  openGraph: {
-    siteName: "Banco Avanz",
-    type: "website",
-    locale: "es_NI",
-  },
-};
+// Metadata global. El favicon se edita desde Strapi (Global → favicon); si no
+// hay uno subido se usa el favicon.ico por defecto del proyecto.
+export async function generateMetadata(): Promise<Metadata> {
+  const global = await getGlobal();
+  const faviconUrl = getStrapiMedia(global?.favicon);
+  return {
+    ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
+    title: {
+      default: global?.siteName ?? "Banco Avanz",
+      template: `%s | ${global?.siteName ?? "Banco Avanz"}`,
+    },
+    description: "Ponemos a disposición productos y servicios a tu medida.",
+    openGraph: {
+      siteName: global?.siteName ?? "Banco Avanz",
+      type: "website",
+      locale: "es_NI",
+    },
+    ...(faviconUrl ? { icons: { icon: faviconUrl } } : {}),
+  };
+}
 
 // ISR: las páginas se cachean y se regeneran cada 5 minutos, así un cambio
 // en Strapi aparece solo sin redeploy y sin golpear el backend en cada visita.
